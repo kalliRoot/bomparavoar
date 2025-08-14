@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bom para Voar - Drone Pulverização</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+  <div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-2xl font-bold text-center mb-4">Bom para Voar - Drone Pulverização</h1>
+    <div id="status" class="text-center p-4 mb-4 rounded-lg bg-gray-200">Carregando...</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="grid"></div>
+  </div>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const statusBox = document.getElementById("status");
+
+    function corStatus(valor, min, max, invertido = false) {
+      let verde = invertido ? valor >= max : valor <= min;
+      let amarelo = invertido ? (valor < max && valor >= min) : (valor > min && valor <= max);
+      if (verde) return "bg-green-300";
+      if (amarelo) return "bg-yellow-300";
+      return "bg-red-300";
+    }
+
+    function preencher(dados) {
+      grid.innerHTML = "";
+
+      const blocos = [
+        { nome: "Clima", valor: dados.clima, cor: "bg-green-300" },
+        { nome: "Nascer/Pôr do Sol", valor: `${dados.sunrise} / ${dados.sunset}`, cor: "bg-yellow-300" },
+        { nome: "Temperatura", valor: `${dados.temp}°C`, cor: "bg-green-300" },
+        { nome: "Vento", valor: `${dados.vento} km/h`, cor: corStatus(dados.vento, 15, 25) },
+        { nome: "Rajadas", valor: `${dados.rajada} km/h`, cor: corStatus(dados.rajada, 25, 35) },
+        { nome: "Prob. chuva", valor: `${dados.chuva}%`, cor: corStatus(dados.chuva, 20, 40) },
+        { nome: "Nuvens", valor: `${dados.nuvens}%`, cor: corStatus(dados.nuvens, 70, 90) },
+        { nome: "Visibilidade", valor: `${dados.visibilidade} mi`, cor: corStatus(dados.visibilidade, 5, 3, true) },
+      ];
+
+      blocos.forEach(b => {
+        let div = document.createElement("div");
+        div.className = `${b.cor} p-4 rounded-lg text-center`;
+        div.innerHTML = `<div class="font-bold">${b.nome}</div><div>${b.valor}</div>`;
+        grid.appendChild(div);
+      });
+
+      // Status geral simples
+      const ok = dados.vento <= 15 && dados.rajada <= 25 && dados.chuva <= 20 && dados.visibilidade >= 5;
+      statusBox.className = `text-center p-4 mb-4 rounded-lg ${ok ? "bg-green-400" : "bg-red-400"}`;
+      statusBox.innerText = ok ? "✅ Bom para voar" : "⚠️ Condições não ideais";
+    }
+
+    function buscarDados(lat, lon) {
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=visibility,cloudcover,precipitation_probability,windspeed_10m,windgusts_10m&daily=sunrise,sunset&timezone=auto`)
+        .then(res => res.json())
+        .then(data => {
+          const agora = 0;
+          const dados = {
+            clima: data.current_weather.weathercode,
+            temp: data.current_weather.temperature,
+            vento: data.current_weather.windspeed,
+            rajada: data.hourly.windgusts_10m[agora],
+            chuva: data.hourly.precipitation_probability[agora],
+            nuvens: data.hourly.cloudcover[agora],
+            visibilidade: (data.hourly.visibility[agora] / 1609).toFixed(1),
+            sunrise: data.daily.sunrise[0].split("T")[1],
+            sunset: data.daily.sunset[0].split("T")[1],
+          };
+          preencher(dados);
+        });
+    }
+
+    function runByGPS() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          buscarDados(pos.coords.latitude, pos.coords.longitude);
+        }, () => {
+          statusBox.innerText = "Não foi possível obter localização.";
+        });
+      } else {
+        statusBox.innerText = "Geolocalização não suportada.";
+      }
+    }
+
+    runByGPS();
+  </script>
+</body>
+</html>
