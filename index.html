@@ -70,6 +70,14 @@
     .dark-mode .suggestion-item:hover {
       background-color: #4a5568;
     }
+    .forecast-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .forecast-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -120,7 +128,7 @@
     
     <div class="border-t-2 border-gray-300 dark:border-gray-600 my-6"></div>
     
-    <h2 class="text-xl font-bold mb-4">Próximas Horas</h2>
+    <h2 class="text-xl font-bold mb-4">Próximas Horas - Clica para Ver</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="forecastGrid"></div>
   </div>
 
@@ -134,8 +142,8 @@
     const themeToggle = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
 
-    // ===== Configuração da quantidade de cards de previsão =====
-    const QTD_PREVISOES = 5; // Altere aqui se quiser mais/menos cards
+    // Configuração da quantidade de cards de previsão
+    const QTD_PREVISOES = 5;
 
     // Tema
     const savedTheme = localStorage.getItem('theme') || 
@@ -344,11 +352,11 @@
         // Cálculos instantâneos
         const pontoOrvalho = (data.current_weather.temperature - ((100 - data.hourly.relativehumidity_2m[horaAtual]) / 5)).toFixed(1);
         
-        // ====== NOVO BLOCO: montar previsões a partir da HORA ATUAL ======
+        // Montar previsões a partir da HORA ATUAL
         const times = data.hourly.time.map(t => new Date(t).getTime());
         const nowMs = Date.now();
 
-        // pegamos o índice do "slot" de hora corrente (última hora <= agora)
+        // Pegamos o índice do "slot" de hora corrente (última hora <= agora)
         let startIdx = times.findIndex(ms => ms > nowMs);
         if (startIdx === -1) startIdx = times.length; // tudo no passado
         startIdx = Math.max(0, startIdx - 1);
@@ -363,11 +371,14 @@
               temp: data.hourly.temperature_2m[idx],
               vento: data.hourly.windspeed_10m[idx],
               chuva: data.hourly.precipitation[idx],
+              umidade: data.hourly.relativehumidity_2m[idx],
+              pontoOrvalho: (data.hourly.temperature_2m[idx] - ((100 - data.hourly.relativehumidity_2m[idx]) / 5)).toFixed(1),
+              deltaT: (data.hourly.temperature_2m[idx] - (data.hourly.temperature_2m[idx] - ((100 - data.hourly.relativehumidity_2m[idx]) / 5))).toFixed(1),
               iconeClima: obterIconeDoWeatherCode(data.hourly.weathercode[idx]),
+              condicao: interpretarWeatherCode(data.hourly.weathercode[idx]),
               isAgora: i === 0 // primeiro card representa a hora corrente
             };
           });
-        // ====== FIM DO NOVO BLOCO ======
 
         const dados = {
           atual: {
@@ -508,12 +519,27 @@
         grid.appendChild(div);
       });
 
-      // ====== NOVO BLOCO DE RENDERIZAÇÃO DAS PRÓXIMAS HORAS ======
-      forecastGrid.innerHTML = "";
+      // Renderização das próximas horas com interatividade
       previsao.forEach((p, idx) => {
-        const textoHora = idx === 0 ? "Agora" : `${p.hora}h`; // 24h + "Agora" no primeiro
+        const textoHora = idx === 0 ? "Agora" : `${p.hora}h`;
+        
+        // Calcula condições para cada hora
+        const condicoesHora = {
+          vento: p.vento <= 15,
+          chuva: p.chuva <= 0.2,
+          umidade: p.umidade >= 40 && p.umidade <= 70,
+          deltaT: p.deltaT >= 2 && p.deltaT <= 8
+        };
+        
+        const okCountHora = Object.values(condicoesHora).filter(Boolean).length;
+        let statusCorHora = '';
+        
+        if (okCountHora === 4) statusCorHora = 'bg-green-100 dark:bg-green-900';
+        else if (okCountHora >= 2) statusCorHora = 'bg-yellow-100 dark:bg-yellow-900';
+        else statusCorHora = 'bg-red-100 dark:bg-red-900';
+
         const card = document.createElement("div");
-        card.className = "bg-white dark:bg-gray-700 p-3 rounded-lg shadow text-center dark:text-white flex flex-col items-center";
+        card.className = `forecast-card ${statusCorHora} p-3 rounded-lg shadow text-center dark:text-white flex flex-col items-center`;
         card.innerHTML = `
           <div class="font-bold mb-1">${textoHora}</div>
           <i class="fas ${p.iconeClima} text-xl my-1"></i>
@@ -521,12 +547,58 @@
           <div class="text-xs">Vento: ${p.vento} km/h</div>
           <div class="text-xs">Chuva: ${p.chuva}mm</div>
         `;
+
+        // Adiciona evento de clique para mostrar detalhes
+        card.addEventListener('click', () => {
+          mostrarDetalhesHora(p, textoHora);
+        });
+
         forecastGrid.appendChild(card);
       });
-      // ====== FIM DO NOVO BLOCO ======
 
       statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
       statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}`;
+    }
+
+    function mostrarDetalhesHora(dadosHora, titulo) {
+      const pontoOrvalho = dadosHora.pontoOrvalho;
+      const deltaT = dadosHora.deltaT;
+      
+      const condicoes = {
+        vento: dadosHora.vento <= 15,
+        chuva: dadosHora.chuva <= 0.2,
+        umidade: dadosHora.umidade >= 40 && dadosHora.umidade <= 70,
+        deltaT: deltaT >= 2 && deltaT <= 8
+      };
+
+      const okCount = Object.values(condicoes).filter(Boolean).length;
+      
+      let statusVoo, statusCor;
+      if (okCount === 4) {
+        statusVoo = "✅ BOM PARA VOAR";
+        statusCor = "bg-green-400 dark:bg-green-600";
+      } else if (okCount >= 2) {
+        statusVoo = "🟡 FAVORÁVEL";
+        statusCor = "bg-yellow-400 dark:bg-yellow-600";
+      } else {
+        statusVoo = "❌ RUIM PARA VOAR";
+        statusCor = "bg-red-400 dark:bg-red-600";
+      }
+
+      // Criar modal ou atualizar status
+      statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
+      statusBox.innerHTML = `
+        <div class="font-bold mb-2">${titulo} - ${dadosHora.condicao}</div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div>Temperatura: ${dadosHora.temp}°C</div>
+          <div>Umidade: ${dadosHora.umidade}%</div>
+          <div>Ponto Orvalho: ${pontoOrvalho}°C</div>
+          <div>Delta T: ${deltaT}°C</div>
+          <div>Vento: ${dadosHora.vento} km/h</div>
+          <div>Chuva: ${dadosHora.chuva}mm</div>
+        </div>
+        <div class="mt-2 font-semibold">${statusVoo}</div>
+      `;
     }
 
     function corStatus(valor, min, max, invertido = false) {
