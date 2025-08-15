@@ -7,46 +7,98 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    .search-container { position: relative; display: flex; width: 100%; }
-    .search-button { position: absolute; right: 0; top: 0; height: 100%; padding: 0 12px; background: #3B82F6; color: white; border: none; border-radius: 0 8px 8px 0; cursor: pointer; }
-    .search-button:hover { background: #2563EB; }
-    #citySuggestions { position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: white; border: 1px solid #ddd; border-radius: 0 0 8px 8px; z-index: 10; display: none; }
-    .suggestion-item { padding: 8px 12px; cursor: pointer; }
-    .suggestion-item:hover { background-color: #f0f0f0; }
+    .search-container {
+      position: relative;
+      display: flex;
+      width: 100%;
+    }
+    .search-button {
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      padding: 0 12px;
+      background: #3B82F6;
+      color: white;
+      border: none;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+    }
+    .search-button:hover {
+      background: #2563EB;
+    }
+    #citySuggestions {
+      position: absolute;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 0 0 8px 8px;
+      z-index: 10;
+      display: none; /* vamos controlar via style.display no JS */
+    }
+    .suggestion-item {
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .suggestion-item:hover {
+      background-color: #f0f0f0;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
   <div class="max-w-4xl mx-auto p-4">
     <h1 class="text-2xl font-bold text-center mb-4">Bom para Voar - Drone Pulverização</h1>
     
+    <!-- Controles -->
     <div class="flex flex-col sm:flex-row gap-4 mb-4">
+      <!-- Campo de busca com autocompletar -->
       <div class="flex-1 relative">
         <input 
-          type="text" id="cityInput" placeholder="Digite a cidade para pulverizar (ex: Bauru, SP)" 
-          class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
+          type="text" 
+          id="cityInput" 
+          placeholder="Digite a cidade para pulverizar (ex: Bauru, SP)" 
+          class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          autocomplete="off"
+        >
         <div id="citySuggestions" class="hidden"></div>
-        <button onclick="buscarPorCidade()" class="absolute right-0 top-0 h-full px-3 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">
+        <button 
+          onclick="buscarPorCidade()" 
+          class="absolute right-0 top-0 h-full px-3 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600"
+        >
           <i class="fas fa-search"></i>
         </button>
       </div>
-      <button onclick="solicitarLocalizacao()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg whitespace-nowrap" id="locationButton">
+      
+      <!-- Botão de localização -->
+      <button 
+        onclick="solicitarLocalizacao()" 
+        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg whitespace-nowrap"
+        id="locationButton"
+      >
         <i class="fas fa-map-marker-alt mr-2"></i>Minha Localização
       </button>
     </div>
     
+    <!-- Status -->
     <div id="status" class="text-center p-4 mb-4 rounded-lg bg-gray-200">
       <i class="fas fa-info-circle mr-2"></i>Digite uma cidade ou use sua localização
     </div>
     
+    <!-- Condições atuais -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="grid"></div>
     
+    <!-- Divisão -->
     <div class="border-t-2 border-gray-300 my-6"></div>
     
+    <!-- Previsões futuras -->
     <h2 class="text-xl font-bold mb-4">Próximas Horas</h2>
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="forecastGrid"></div>
   </div>
 
   <script>
+    // Elementos DOM
     const grid = document.getElementById("grid");
     const forecastGrid = document.getElementById("forecastGrid");
     const statusBox = document.getElementById("status");
@@ -54,60 +106,134 @@
     const citySuggestions = document.getElementById("citySuggestions");
     const locationButton = document.getElementById("locationButton");
 
+    // Variáveis de estado
     let ultimaBusca = null;
     let usandoGPS = false;
     let ultimaLocalizacao = null;
-    let ultimoStatusVoo = ""; // NOVO - armazena se está bom, regular ou ruim para voar
 
-    const cidadesDisponiveis = [
-      "Assis, SP", "Bauru, SP", "Campinas, SP", "Londrina, PR", 
-      "Ribeirão Preto, SP", "São Paulo, SP", "Rio de Janeiro, RJ"
-    ];
-
-    cityInput.addEventListener("input", function() {
-      const termo = this.value.toLowerCase();
+    // ==== AUTOCOMPLETAR (QUALQUER CIDADE) USANDO NOMINATIM ====
+    let sugestaoAbortCtrl = null;
+    cityInput.addEventListener("input", async function() {
+      const termo = this.value.trim();
       citySuggestions.innerHTML = "";
-      if (termo.length < 2) { citySuggestions.classList.add("hidden"); return; }
-      const sugestoes = cidadesDisponiveis.filter(cidade => cidade.toLowerCase().includes(termo));
-      if (sugestoes.length === 0) { citySuggestions.classList.add("hidden"); return; }
-      sugestoes.forEach(cidade => {
-        const div = document.createElement("div");
-        div.className = "suggestion-item";
-        div.textContent = cidade;
-        div.onclick = () => { cityInput.value = cidade; citySuggestions.classList.add("hidden"); buscarPorCidade(); };
-        citySuggestions.appendChild(div);
-      });
-      citySuggestions.classList.remove("hidden");
+
+      if (termo.length < 2) {
+        citySuggestions.style.display = "none";
+        citySuggestions.classList.add("hidden");
+        return;
+      }
+
+      try {
+        // cancela requisição anterior se ainda estiver aberta
+        if (sugestaoAbortCtrl) sugestaoAbortCtrl.abort();
+        sugestaoAbortCtrl = new AbortController();
+
+        const resp = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(termo)}&limit=7&accept-language=pt-BR`,
+          { signal: sugestaoAbortCtrl.signal, headers: { "Accept": "application/json" } }
+        );
+        const dados = await resp.json();
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+          citySuggestions.style.display = "none";
+          citySuggestions.classList.add("hidden");
+          return;
+        }
+
+        dados.forEach(item => {
+          const div = document.createElement("div");
+          div.className = "suggestion-item";
+          div.textContent = item.display_name;
+          div.onclick = () => {
+            cityInput.value = item.display_name;
+            citySuggestions.style.display = "none";
+            citySuggestions.classList.add("hidden");
+            buscarPorCidade();
+          };
+          citySuggestions.appendChild(div);
+        });
+
+        citySuggestions.classList.remove("hidden");
+        citySuggestions.style.display = "block"; // força exibir, mesmo com CSS base
+      } catch (e) {
+        // ignorar abortos
+        citySuggestions.style.display = "none";
+        citySuggestions.classList.add("hidden");
+      }
     });
 
-    document.addEventListener("click", e => { if (e.target !== cityInput) citySuggestions.classList.add("hidden"); });
+    // Enter para buscar
+    cityInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") buscarPorCidade();
+    });
 
+    // Fechar sugestões ao clicar fora
+    document.addEventListener("click", function(e) {
+      if (!citySuggestions.contains(e.target) && e.target !== cityInput) {
+        citySuggestions.style.display = "none";
+        citySuggestions.classList.add("hidden");
+      }
+    });
+
+    // Função para mostrar status temporário (informativo)
     function mostrarStatus(mensagem, tipo = 'info') {
-      const cores = { info: 'bg-gray-200', success: 'bg-green-400', warning: 'bg-yellow-400', error: 'bg-red-400' };
-      const icones = { info: 'fa-info-circle', success: 'fa-check-circle', warning: 'fa-exclamation-circle', error: 'fa-exclamation-triangle' };
+      const cores = {
+        info: 'bg-gray-200',
+        success: 'bg-green-400',
+        warning: 'bg-yellow-400',
+        error: 'bg-red-400'
+      };
+      const icones = {
+        info: 'fa-info-circle',
+        success: 'fa-check-circle',
+        warning: 'fa-exclamation-circle',
+        error: 'fa-exclamation-triangle'
+      };
+      
       statusBox.className = `text-center p-4 mb-4 rounded-lg ${cores[tipo]}`;
       statusBox.innerHTML = `<i class="fas ${icones[tipo]} mr-2"></i>${mensagem}`;
     }
 
+    // Função para solicitar localização (GPS)
     async function solicitarLocalizacao() {
       mostrarStatus('Obtendo sua localização...', 'info');
       locationButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Buscando...';
       locationButton.disabled = true;
+
       if (!navigator.geolocation) {
         mostrarStatus('Geolocalização não suportada pelo navegador', 'error');
         locationButton.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i>Minha Localização';
         locationButton.disabled = false;
         return;
       }
+
       try {
         const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+          navigator.geolocation.getCurrentPosition(
+            resolve, 
+            reject, 
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
         });
-        ultimaLocalizacao = { lat: position.coords.latitude, lon: position.coords.longitude };
+
+        ultimaLocalizacao = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude
+        };
+        
+        // Obter nome da cidade
         const cidade = await obterNomeCidade(position.coords.latitude, position.coords.longitude);
         cityInput.value = cidade;
+        
+        // Buscar dados meteorológicos (exibirDados vai atualizar a barra com BOM/FAVORÁVEL/NÃO FAVORÁVEL/RUIM)
         await buscarDadosMeteorologicos(position.coords.latitude, position.coords.longitude, cidade);
-        mostrarStatus(`Localização obtida com sucesso - ${ultimoStatusVoo}`, 'success'); // ALTERADO
+
+        // IMPORTANTE: não sobrescrever o status aqui.
+        // (Removido o "Localização obtida com sucesso")
       } catch (error) {
         console.error('Erro na geolocalização:', error);
         mostrarStatus('Não foi possível obter sua localização. Verifique as permissões do navegador.', 'error');
@@ -117,60 +243,70 @@
       }
     }
 
+    // Função para obter nome da cidade
     async function obterNomeCidade(lat, lon) {
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=pt-BR`);
         const data = await response.json();
-        return data.address.city || data.address.town || data.address.village || data.address.municipality || data.address.county || "Sua Localização";
-      } catch {
+        return data.address.city || data.address.town || data.address.village || 
+               data.address.municipality || data.address.county || "Sua Localização";
+      } catch (error) {
+        console.error('Erro ao obter nome da cidade:', error);
         return "Sua Localização";
       }
     }
 
+    // Função para buscar por cidade (qualquer cidade)
     async function buscarPorCidade() {
       const cidade = cityInput.value.trim();
-      if (!cidade) { mostrarStatus('Digite uma cidade para buscar', 'warning'); return; }
+      if (!cidade) {
+        mostrarStatus('Digite uma cidade para buscar', 'warning');
+        return;
+      }
+
       mostrarStatus(`Buscando dados para ${cidade}...`, 'info');
+
       try {
-        const cidadeConhecida = cidadesDisponiveis.find(c => c.toLowerCase() === cidade.toLowerCase());
-        if (cidadeConhecida) {
-          const coordenadas = obterCoordenadasCidade(cidadeConhecida);
-          if (coordenadas) { await buscarDadosMeteorologicos(coordenadas.lat, coordenadas.lon, cidadeConhecida); return; }
-        }
         const coords = await obterCoordenadasCidadeAPI(cidade);
-        if (coords) await buscarDadosMeteorologicos(coords.lat, coords.lon, cidade);
-        else mostrarStatus('Cidade não encontrada', 'error');
-      } catch {
+        if (coords) {
+          await buscarDadosMeteorologicos(coords.lat, coords.lon, cidade);
+        } else {
+          mostrarStatus('Cidade não encontrada', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar cidade:', error);
         mostrarStatus('Erro ao buscar dados da cidade', 'error');
       }
     }
 
-    function obterCoordenadasCidade(cidade) {
-      const coordenadas = {
-        "Assis, SP": { lat: -22.6619, lon: -50.4119 }, "Bauru, SP": { lat: -22.3145, lon: -49.0584 },
-        "Campinas, SP": { lat: -22.9056, lon: -47.0608 }, "Londrina, PR": { lat: -23.3103, lon: -51.1628 },
-        "Ribeirão Preto, SP": { lat: -21.1775, lon: -47.8103 }, "São Paulo, SP": { lat: -23.5505, lon: -46.6333 },
-        "Rio de Janeiro, RJ": { lat: -22.9068, lon: -43.1729 }
-      };
-      return coordenadas[cidade];
-    }
-
+    // Buscar coordenadas via API de geocodificação (Nominatim)
     async function obterCoordenadasCidadeAPI(cidade) {
       try {
         const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidade)}&limit=1&accept-language=pt-BR`);
         const data = await response.json();
-        if (data.length > 0) return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+        if (Array.isArray(data) && data.length > 0) {
+          return {
+            lat: parseFloat(data[0].lat),
+            lon: parseFloat(data[0].lon)
+          };
+        }
         return null;
-      } catch { return null; }
+      } catch (error) {
+        console.error('Erro na geocodificação:', error);
+        return null;
+      }
     }
 
+    // Função para buscar dados meteorológicos (Open-Meteo)
     async function buscarDadosMeteorologicos(lat, lon, cidade) {
       try {
         const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m,windgusts_10m,visibility&timezone=auto`);
         const data = await response.json();
+        
         const agora = new Date();
         const horaAtual = agora.getHours();
         const pontoOrvalho = (data.current_weather.temperature - ((100 - data.hourly.relativehumidity_2m[horaAtual]) / 5)).toFixed(1);
+        
         const dados = {
           atual: {
             condicao: interpretarWeatherCode(data.current_weather.weathercode),
@@ -195,16 +331,48 @@
             iconeClima: obterIconeDoWeatherCode(data.hourly.weathercode[i])
           }))
         };
+        
         exibirDados(dados.atual, dados.previsao);
         ultimaBusca = { lat, lon, cidade };
         usandoGPS = !!cidade;
-      } catch {
+      } catch (error) {
+        console.error('Erro na API meteorológica:', error);
         mostrarStatus('Erro ao buscar dados meteorológicos', 'error');
       }
     }
 
+    // Funções auxiliares para interpretar dados meteorológicos
     function interpretarWeatherCode(code) {
-      const codes = { 0: "Céu limpo", 1: "Poucas nuvens", 2: "Parcialmente nublado", 3: "Nublado", 45: "Nevoeiro", 48: "Nevoeiro com geada", 51: "Chuvisco leve", 53: "Chuvisco moderado", 55: "Chuvisco denso", 56: "Chuvisco congelante leve", 57: "Chuvisco congelante denso", 61: "Chuva leve", 63: "Chuva moderada", 65: "Chuva forte", 66: "Chuva congelante leve", 67: "Chuva congelante forte", 71: "Queda de neve leve", 73: "Queda de neve moderada", 75: "Queda de neve forte", 77: "Grãos de neve", 80: "Pancadas de chuva leves", 81: "Pancadas de chuva moderadas", 82: "Pancadas de chuva violentas", 85: "Pancadas de neve leves", 86: "Pancadas de neve pesadas", 95: "Trovoada", 96: "Trovoada com chuva leve", 99: "Trovoada com chuva forte" };
+      const codes = {
+        0: "Céu limpo",
+        1: "Poucas nuvens",
+        2: "Parcialmente nublado",
+        3: "Nublado",
+        45: "Nevoeiro",
+        48: "Nevoeiro com geada",
+        51: "Chuvisco leve",
+        53: "Chuvisco moderado",
+        55: "Chuvisco denso",
+        56: "Chuvisco congelante leve",
+        57: "Chuvisco congelante denso",
+        61: "Chuva leve",
+        63: "Chuva moderada",
+        65: "Chuva forte",
+        66: "Chuva congelante leve",
+        67: "Chuva congelante forte",
+        71: "Queda de neve leve",
+        73: "Queda de neve moderada",
+        75: "Queda de neve forte",
+        77: "Grãos de neve",
+        80: "Pancadas de chuva leves",
+        81: "Pancadas de chuva moderadas",
+        82: "Pancadas de chuva violentas",
+        85: "Pancadas de neve leves",
+        86: "Pancadas de neve pesadas",
+        95: "Trovoada",
+        96: "Trovoada com chuva leve",
+        99: "Trovoada com chuva forte"
+      };
       return codes[code] || `Código ${code}`;
     }
 
@@ -224,32 +392,102 @@
       return direcoes[Math.round(graus / 45) % 8];
     }
 
+    // Exibir dados na tela + STATUS DE VOO (com 4 níveis)
     function exibirDados(dadosAtuais, previsao) {
+      // Limpar grids
       grid.innerHTML = "";
       forecastGrid.innerHTML = "";
+
+      // Calcular Delta T e Ponto de Orvalho (fallback)
       const pontoOrvalho = dadosAtuais.pontoOrvalho || (dadosAtuais.temp - ((100 - dadosAtuais.umidade) / 5)).toFixed(1);
       const deltaT = dadosAtuais.deltaT || (dadosAtuais.temp - pontoOrvalho).toFixed(1);
-      const condicoes = {
-        vento: dadosAtuais.vento <= 15,
-        rajada: dadosAtuais.rajada <= 25,
-        chuva: dadosAtuais.chuva <= 0.2,
-        visibilidade: dadosAtuais.visibilidade >= 5,
-        deltaT: deltaT >= 2 && deltaT <= 8,
-        umidade: dadosAtuais.umidade >= 40 && dadosAtuais.umidade <= 70
-      };
-      const todasOk = Object.values(condicoes).every(c => c);
-      const algumasOk = Object.values(condicoes).filter(c => c).length >= 4;
-      let statusVoo, statusCor, statusIcone;
-      if (todasOk) { statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!"; statusCor = "bg-green-400"; statusIcone = "fa-check-circle"; }
-      else if (algumasOk) { statusVoo = "⚠️ CONDIÇÕES REGULARES - Avalie com cautela"; statusCor = "bg-yellow-400"; statusIcone = "fa-exclamation-circle"; }
-      else { statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis"; statusCor = "bg-red-400"; statusIcone = "fa-times-circle"; }
-      
-      ultimoStatusVoo = statusVoo; // NOVO - guarda status para usar no "Localização obtida com sucesso"
 
+      // Critérios Técnicos para Pulverização (como você pediu)
+      const condicoes = {
+        vento: dadosAtuais.vento <= 15,                // Vento até 15 km/h
+        rajada: dadosAtuais.rajada <= 25,              // Rajadas até 25 km/h
+        chuva: dadosAtuais.chuva <= 0.2,               // Chuva até 0.2mm
+        visibilidade: dadosAtuais.visibilidade >= 5,   // Visibilidade mínima 5km
+        deltaT: deltaT >= 2 && deltaT <= 8,            // Delta T entre 2°C e 8°C
+        umidade: dadosAtuais.umidade >= 40 && dadosAtuais.umidade <= 70 // Umidade 40%-70%
+      };
+
+      const okCount = Object.values(condicoes).filter(Boolean).length;
+
+      // 4 níveis: Bom / Favorável / Não Favorável / Ruim
+      let statusVoo, statusCor, statusIcone;
+      if (okCount === 6) {
+        statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!";
+        statusCor = "bg-green-400";
+        statusIcone = "fa-check-circle";
+      } else if (okCount >= 4) {
+        statusVoo = "🟡 FAVORÁVEL - Avalie com cautela";
+        statusCor = "bg-yellow-400";
+        statusIcone = "fa-exclamation-circle";
+      } else if (okCount >= 2) {
+        statusVoo = "🟠 NÃO FAVORÁVEL - Ajuste parâmetros";
+        statusCor = "bg-orange-400";
+        statusIcone = "fa-exclamation-triangle";
+      } else {
+        statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis";
+        statusCor = "bg-red-400";
+        statusIcone = "fa-times-circle";
+      }
+
+      // Exibir condições atuais (mantendo seu layout colorido)
       const blocosAtuais = [
         { nome: "Condição", valor: dadosAtuais.condicao, icone: dadosAtuais.iconeClima, cor: "bg-blue-100" },
         { nome: "Temperatura", valor: `${dadosAtuais.temp}°C`, icone: "fa-temperature-high", cor: corStatus(dadosAtuais.temp, 10, 30, true) },
         { nome: "Umidade", valor: `${dadosAtuais.umidade}%`, icone: "fa-tint", cor: corStatus(dadosAtuais.umidade, 30, 70) },
         { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
-       
-```
+        { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: corStatus(deltaT, 2, 8) },
+        { nome: "Vento", valor: `${dadosAtuais.vento} km/h ${dadosAtuais.direcaoVento}`, icone: "fa-wind", cor: corStatus(dadosAtuais.vento, 15, 25) },
+        { nome: "Rajadas", valor: `${dadosAtuais.rajada} km/h`, icone: "fa-wind", cor: corStatus(dadosAtuais.rajada, 25, 35) },
+        { nome: "Chuva", valor: `${dadosAtuais.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dadosAtuais.chuva, 0.5, 2) },
+        { nome: "Visibilidade", valor: `${dadosAtuais.visibilidade} km`, icone: "fa-eye", cor: corStatus(dadosAtuais.visibilidade, 5, 3, true) },
+        { nome: "Atualizado", valor: dadosAtuais.atualizado, icone: "fa-clock", cor: "bg-gray-200" }
+      ];
+
+      blocosAtuais.forEach(b => {
+        const div = document.createElement("div");
+        div.className = `${b.cor} p-4 rounded-lg flex flex-col items-center text-center`;
+        div.innerHTML = `
+          <div class="font-bold mb-1">${b.nome}</div>
+          <i class="fas ${b.icone} text-xl mb-1"></i>
+          <div>${b.valor}</div>
+        `;
+        grid.appendChild(div);
+      });
+
+      // Exibir previsões (a cada 2 horas, como no seu código)
+      previsao.forEach((p, i) => {
+        if (i % 2 === 0) {
+          const div = document.createElement("div");
+          div.className = "bg-white p-3 rounded-lg shadow text-center";
+          div.innerHTML = `
+            <div class="font-bold">${p.hora}</div>
+            <i class="fas ${p.iconeClima} text-2xl my-2"></i>
+            <div>${p.temp}°C</div>
+            <div class="text-sm">Vento: ${p.vento} km/h</div>
+            <div class="text-sm">Chuva: ${p.chuva}mm</div>
+          `;
+          forecastGrid.appendChild(div);
+        }
+      });
+
+      // Atualizar status com a mensagem de voo (substitui qualquer texto anterior)
+      statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor}`;
+      statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}`;
+    }
+
+    // Função auxiliar para determinar cor do status nos cards (mantida)
+    function corStatus(valor, min, max, invertido = false) {
+      let verde = invertido ? valor >= max : valor <= min;
+      let amarelo = invertido ? (valor < max && valor >= min) : (valor > min && valor <= max);
+      if (verde) return "bg-green-300";
+      if (amarelo) return "bg-yellow-300";
+      return "bg-red-300";
+    }
+  </script>
+</body>
+</html>
