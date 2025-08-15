@@ -124,12 +124,12 @@
       <i class="fas fa-info-circle mr-2"></i>Digite uma cidade ou use sua localização
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="grid"></div>
+    <div id="grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
     
     <div class="border-t-2 border-gray-300 dark:border-gray-600 my-6"></div>
     
-    <h2 class="text-xl font-bold mb-4">Próximas Horas - Clica para Ver</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4" id="forecastGrid"></div>
+    <h2 class="text-xl font-bold mb-4">Próximas Horas</h2>
+    <div id="forecastGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
   </div>
 
   <script>
@@ -462,68 +462,83 @@
       grid.innerHTML = "";
       forecastGrid.innerHTML = "";
 
-      const pontoOrvalho = dadosAtuais.pontoOrvalho || (dadosAtuais.temp - ((100 - dadosAtuais.umidade) / 5)).toFixed(1);
-      const deltaT = dadosAtuais.deltaT || (dadosAtuais.temp - pontoOrvalho).toFixed(1);
+      // Armazenar os dados atuais originais para poder restaurar depois
+      const dadosAtuaisOriginais = {...dadosAtuais};
+      let dadosExibidosAtualmente = {...dadosAtuais};
 
-      const condicoes = {
-        vento: dadosAtuais.vento <= 15,
-        rajada: dadosAtuais.rajada <= 25,
-        chuva: dadosAtuais.chuva <= 0.2,
-        visibilidade: dadosAtuais.visibilidade >= 5,
-        deltaT: deltaT >= 2 && deltaT <= 8,
-        umidade: dadosAtuais.umidade >= 40 && dadosAtuais.umidade <= 70
+      const atualizarDadosPrincipais = (dados) => {
+        dadosExibidosAtualmente = {...dados};
+        const pontoOrvalho = dados.pontoOrvalho || (dados.temp - ((100 - dados.umidade) / 5)).toFixed(1);
+        const deltaT = dados.deltaT || (dados.temp - pontoOrvalho).toFixed(1);
+
+        const condicoes = {
+          vento: dados.vento <= 15,
+          rajada: dados.rajada <= 25,
+          chuva: dados.chuva <= 0.2,
+          visibilidade: dados.visibilidade >= 5,
+          deltaT: deltaT >= 2 && deltaT <= 8,
+          umidade: dados.umidade >= 40 && dados.umidade <= 70
+        };
+
+        const okCount = Object.values(condicoes).filter(Boolean).length;
+
+        let statusVoo, statusCor, statusIcone;
+        if (okCount === 6) {
+          statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!";
+          statusCor = "bg-green-400 dark:bg-green-600";
+          statusIcone = "fa-check-circle";
+        } else if (okCount >= 4) {
+          statusVoo = "🟡 FAVORÁVEL - Avalie com cautela";
+          statusCor = "bg-yellow-400 dark:bg-yellow-600";
+          statusIcone = "fa-exclamation-circle";
+        } else if (okCount >= 2) {
+          statusVoo = "🟠 NÃO FAVORÁVEL - Ajuste parâmetros";
+          statusCor = "bg-orange-400 dark:bg-orange-600";
+          statusIcone = "fa-exclamation-triangle";
+        } else {
+          statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis";
+          statusCor = "bg-red-400 dark:bg-red-600";
+          statusIcone = "fa-times-circle";
+        }
+
+        // Atualizar os blocos principais
+        grid.innerHTML = "";
+        const blocosAtuais = [
+          { nome: "Condição", valor: dados.condicao, icone: dados.iconeClima, cor: "bg-blue-100 dark:bg-blue-900" },
+          { nome: "Temperatura", valor: `${dados.temp}°C`, icone: "fa-temperature-high", cor: corStatus(dados.temp, 10, 30, true) },
+          { nome: "Umidade", valor: `${dados.umidade}%`, icone: "fa-tint", cor: corStatus(dados.umidade, 30, 70) },
+          { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
+          { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: corStatus(deltaT, 2, 8) },
+          { nome: "Vento", valor: `${dados.vento} km/h ${dados.direcaoVento}`, icone: "fa-wind", cor: corStatus(dados.vento, 15, 25) },
+          { nome: "Rajadas", valor: `${dados.rajada} km/h`, icone: "fa-wind", cor: corStatus(dados.rajada, 25, 35) },
+          { nome: "Chuva", valor: `${dados.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dados.chuva, 0.5, 2) },
+          { nome: "Visibilidade", valor: `${dados.visibilidade} km`, icone: "fa-eye", cor: corStatus(dados.visibilidade, 5, 3, true) },
+          { nome: "Atualizado", valor: dados.atualizado, icone: "fa-clock", cor: "bg-gray-200 dark:bg-gray-700" }
+        ];
+
+        blocosAtuais.forEach(b => {
+          const div = document.createElement("div");
+          div.className = `${b.cor} p-4 rounded-lg flex flex-col items-center text-center dark:text-white`;
+          div.innerHTML = `
+            <div class="font-bold mb-1">${b.nome}</div>
+            <i class="fas ${b.icone} text-xl mb-1"></i>
+            <div>${b.valor}</div>
+          `;
+          grid.appendChild(div);
+        });
+
+        // Atualizar o status box
+        statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
+        statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}`;
       };
 
-      const okCount = Object.values(condicoes).filter(Boolean).length;
+      // Exibir os dados atuais inicialmente
+      atualizarDadosPrincipais(dadosAtuaisOriginais);
 
-      let statusVoo, statusCor, statusIcone;
-      if (okCount === 6) {
-        statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!";
-        statusCor = "bg-green-400 dark:bg-green-600";
-        statusIcone = "fa-check-circle";
-      } else if (okCount >= 4) {
-        statusVoo = "🟡 FAVORÁVEL - Avalie com cautela";
-        statusCor = "bg-yellow-400 dark:bg-yellow-600";
-        statusIcone = "fa-exclamation-circle";
-      } else if (okCount >= 2) {
-        statusVoo = "🟠 NÃO FAVORÁVEL - Ajuste parâmetros";
-        statusCor = "bg-orange-400 dark:bg-orange-600";
-        statusIcone = "fa-exclamation-triangle";
-      } else {
-        statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis";
-        statusCor = "bg-red-400 dark:bg-red-600";
-        statusIcone = "fa-times-circle";
-      }
-
-      const blocosAtuais = [
-        { nome: "Condição", valor: dadosAtuais.condicao, icone: dadosAtuais.iconeClima, cor: "bg-blue-100 dark:bg-blue-900" },
-        { nome: "Temperatura", valor: `${dadosAtuais.temp}°C`, icone: "fa-temperature-high", cor: corStatus(dadosAtuais.temp, 10, 30, true) },
-        { nome: "Umidade", valor: `${dadosAtuais.umidade}%`, icone: "fa-tint", cor: corStatus(dadosAtuais.umidade, 30, 70) },
-        { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
-        { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: corStatus(deltaT, 2, 8) },
-        { nome: "Vento", valor: `${dadosAtuais.vento} km/h ${dadosAtuais.direcaoVento}`, icone: "fa-wind", cor: corStatus(dadosAtuais.vento, 15, 25) },
-        { nome: "Rajadas", valor: `${dadosAtuais.rajada} km/h`, icone: "fa-wind", cor: corStatus(dadosAtuais.rajada, 25, 35) },
-        { nome: "Chuva", valor: `${dadosAtuais.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dadosAtuais.chuva, 0.5, 2) },
-        { nome: "Visibilidade", valor: `${dadosAtuais.visibilidade} km`, icone: "fa-eye", cor: corStatus(dadosAtuais.visibilidade, 5, 3, true) },
-        { nome: "Atualizado", valor: dadosAtuais.atualizado, icone: "fa-clock", cor: "bg-gray-200 dark:bg-gray-700" }
-      ];
-
-      blocosAtuais.forEach(b => {
-        const div = document.createElement("div");
-        div.className = `${b.cor} p-4 rounded-lg flex flex-col items-center text-center dark:text-white`;
-        div.innerHTML = `
-          <div class="font-bold mb-1">${b.nome}</div>
-          <i class="fas ${b.icone} text-xl mb-1"></i>
-          <div>${b.valor}</div>
-        `;
-        grid.appendChild(div);
-      });
-
-      // Renderização das próximas horas com interatividade
+      // Renderizar os cards de previsão
       previsao.forEach((p, idx) => {
         const textoHora = idx === 0 ? "Agora" : `${p.hora}h`;
         
-        // Calcula condições para cada hora
         const condicoesHora = {
           vento: p.vento <= 15,
           chuva: p.chuva <= 0.2,
@@ -548,57 +563,28 @@
           <div class="text-xs">Chuva: ${p.chuva}mm</div>
         `;
 
-        // Adiciona evento de clique para mostrar detalhes
         card.addEventListener('click', () => {
-          mostrarDetalhesHora(p, textoHora);
+          if (idx === 0) {
+            // Se clicar no "Agora", volta para os dados originais
+            atualizarDadosPrincipais(dadosAtuaisOriginais);
+          } else {
+            // Para outras horas, mostra os dados daquela hora
+            const dadosHora = {
+              ...p,
+              rajada: p.vento * 1.5, // Estimativa de rajada
+              visibilidade: 10, // Valor padrão
+              direcaoVento: "Variável", // Não temos essa info na previsão
+              atualizado: new Date().toLocaleTimeString(),
+              localizacao: dadosAtuaisOriginais.localizacao,
+              iconeClima: p.iconeClima,
+              condicao: p.condicao
+            };
+            atualizarDadosPrincipais(dadosHora);
+          }
         });
 
         forecastGrid.appendChild(card);
       });
-
-      statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
-      statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}`;
-    }
-
-    function mostrarDetalhesHora(dadosHora, titulo) {
-      const pontoOrvalho = dadosHora.pontoOrvalho;
-      const deltaT = dadosHora.deltaT;
-      
-      const condicoes = {
-        vento: dadosHora.vento <= 15,
-        chuva: dadosHora.chuva <= 0.2,
-        umidade: dadosHora.umidade >= 40 && dadosHora.umidade <= 70,
-        deltaT: deltaT >= 2 && deltaT <= 8
-      };
-
-      const okCount = Object.values(condicoes).filter(Boolean).length;
-      
-      let statusVoo, statusCor;
-      if (okCount === 4) {
-        statusVoo = "✅ BOM PARA VOAR";
-        statusCor = "bg-green-400 dark:bg-green-600";
-      } else if (okCount >= 2) {
-        statusVoo = "🟡 FAVORÁVEL";
-        statusCor = "bg-yellow-400 dark:bg-yellow-600";
-      } else {
-        statusVoo = "❌ RUIM PARA VOAR";
-        statusCor = "bg-red-400 dark:bg-red-600";
-      }
-
-      // Criar modal ou atualizar status
-      statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
-      statusBox.innerHTML = `
-        <div class="font-bold mb-2">${titulo} - ${dadosHora.condicao}</div>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-          <div>Temperatura: ${dadosHora.temp}°C</div>
-          <div>Umidade: ${dadosHora.umidade}%</div>
-          <div>Ponto Orvalho: ${pontoOrvalho}°C</div>
-          <div>Delta T: ${deltaT}°C</div>
-          <div>Vento: ${dadosHora.vento} km/h</div>
-          <div>Chuva: ${dadosHora.chuva}mm</div>
-        </div>
-        <div class="mt-2 font-semibold">${statusVoo}</div>
-      `;
     }
 
     function corStatus(valor, min, max, invertido = false) {
