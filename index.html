@@ -387,7 +387,7 @@
             temp: data.current_weather.temperature,
             umidade: data.hourly.relativehumidity_2m[horaAtual],
             vento: data.current_weather.windspeed,
-            rajada: data.hourly.windgusts_10m[horaAtual],
+            rajada: Math.round(data.hourly.windgusts_10m[horaAtual]), // Arredondando o valor
             direcaoVento: direcaoVento(data.current_weather.winddirection),
             chuva: data.hourly.precipitation[horaAtual],
             visibilidade: (data.hourly.visibility[horaAtual] / 1000).toFixed(1),
@@ -458,7 +458,7 @@
       return direcoes[Math.round(graus / 45) % 8];
     }
 
-    function exibirDados(dadosAtuais, previsao) {
+     function exibirDados(dadosAtuais, previsao) {
       grid.innerHTML = "";
       forecastGrid.innerHTML = "";
 
@@ -510,7 +510,7 @@
           { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
           { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: corStatus(deltaT, 2, 8) },
           { nome: "Vento", valor: `${dados.vento} km/h ${dados.direcaoVento}`, icone: "fa-wind", cor: corStatus(dados.vento, 15, 25) },
-          { nome: "Rajadas", valor: `${dados.rajada} km/h`, icone: "fa-wind", cor: corStatus(dados.rajada, 25, 35) },
+          { nome: "Rajadas", valor: `${Math.round(dados.rajada)} km/h`, icone: "fa-wind", cor: corStatus(dados.rajada, 25, 35) }, // Arredondando o valor
           { nome: "Chuva", valor: `${dados.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dados.chuva, 0.5, 2) },
           { nome: "Visibilidade", valor: `${dados.visibilidade} km`, icone: "fa-eye", cor: corStatus(dados.visibilidade, 5, 3, true) },
           { nome: "Atualizado", valor: dados.atualizado, icone: "fa-clock", cor: "bg-gray-200 dark:bg-gray-700" }
@@ -571,7 +571,7 @@
             // Para outras horas, mostra os dados daquela hora
             const dadosHora = {
               ...p,
-              rajada: p.vento * 1.5, // Estimativa de rajada
+              rajada: Math.round(p.vento * 1.5), // Arredondando o valor
               visibilidade: 10, // Valor padrão
               direcaoVento: "Variável", // Não temos essa info na previsão
               atualizado: new Date().toLocaleTimeString(),
