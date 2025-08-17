@@ -6,6 +6,8 @@
   <title>Bom para Voar - Drone Pulverização</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Biblioteca para exportar Excel -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
   <style>
     .search-container {
       position: relative;
@@ -84,13 +86,22 @@
   <div class="max-w-4xl mx-auto p-4">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Bom para Voar - Drone Pulverização</h1>
-      <button 
-        id="themeToggle" 
-        class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-        title="Alternar tema claro/escuro"
-      >
-        <i class="fas fa-moon" id="themeIcon"></i>
-      </button>
+      <div class="flex items-center">
+        <button 
+          id="themeToggle" 
+          class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+          title="Alternar tema claro/escuro"
+        >
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        <button
+          id="downloadReport"
+          class="ml-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+          title="Baixar relatório com os dados atuais"
+        >
+          <i class="fas fa-download"></i> Baixar Relatório
+        </button>
+      </div>
     </div>
     
     <div class="flex flex-col sm:flex-row gap-4 mb-4">
@@ -341,16 +352,13 @@
 
     async function buscarDadosMeteorologicos(lat, lon, cidade) {
       try {
-        // Primeiro buscamos os dados meteorológicos
         const meteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m,windgusts_10m,visibility&timezone=auto`);
         const meteoData = await meteoResponse.json();
         
-        // Agora buscamos o índice KP (geomagnético)
         let kpIndex = "N/D";
         try {
           const kpResponse = await fetch(`https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json`);
           const kpData = await kpResponse.json();
-          // Pegamos o último valor disponível (o array começa com cabeçalhos)
           if (kpData.length > 1) {
             const lastEntry = kpData[kpData.length - 1];
             kpIndex = parseFloat(lastEntry[1]).toFixed(1);
@@ -362,16 +370,13 @@
         const agora = new Date();
         const horaAtual = agora.getHours();
 
-        // Cálculos instantâneos
         const pontoOrvalho = (meteoData.current_weather.temperature - ((100 - meteoData.hourly.relativehumidity_2m[horaAtual]) / 5)).toFixed(1);
         
-        // Montar previsões a partir da HORA ATUAL
         const times = meteoData.hourly.time.map(t => new Date(t).getTime());
         const nowMs = Date.now();
 
-        // Pegamos o índice do "slot" de hora corrente (última hora <= agora)
         let startIdx = times.findIndex(ms => ms > nowMs);
-        if (startIdx === -1) startIdx = times.length; // tudo no passado
+        if (startIdx === -1) startIdx = times.length;
         startIdx = Math.max(0, startIdx - 1);
 
         const previsao = meteoData.hourly.time
@@ -380,7 +385,7 @@
             const idx = startIdx + i;
             const d = new Date(time);
             return {
-              hora: d.getHours(), // 0..23
+              hora: d.getHours(),
               temp: meteoData.hourly.temperature_2m[idx],
               vento: meteoData.hourly.windspeed_10m[idx],
               chuva: meteoData.hourly.precipitation[idx],
@@ -389,7 +394,7 @@
               deltaT: (meteoData.hourly.temperature_2m[idx] - (meteoData.hourly.temperature_2m[idx] - ((100 - meteoData.hourly.relativehumidity_2m[idx]) / 5))).toFixed(1),
               iconeClima: obterIconeDoWeatherCode(meteoData.hourly.weathercode[idx]),
               condicao: interpretarWeatherCode(meteoData.hourly.weathercode[idx]),
-              isAgora: i === 0 // primeiro card representa a hora corrente
+              isAgora: i === 0
             };
           });
 
@@ -410,7 +415,7 @@
             atualizado: agora.toLocaleTimeString(),
             localizacao: cidade
           },
-          previsao // já vem limitado a QTD_PREVISOES
+          previsao
         };
         
         exibirDados(dados.atual, dados.previsao);
@@ -484,7 +489,6 @@
         const pontoOrvalho = dados.pontoOrvalho || (dados.temp - ((100 - dados.umidade) / 5)).toFixed(1);
         const deltaT = dados.deltaT || (dados.temp - pontoOrvalho).toFixed(1);
         
-        // Avaliação do KP (0-9, onde 0-4 é calmo, 5 é perturbado, 6+ é tempestade)
         const kpStatus = dados.kpIndex === "N/D" ? null : parseFloat(dados.kpIndex);
         const kpOk = kpStatus === null ? true : kpStatus <= 4;
 
@@ -520,7 +524,6 @@
           statusIcone = "fa-times-circle";
         }
 
-        // Atualizar os blocos principais
         grid.innerHTML = "";
         const blocosAtuais = [
           { nome: "Condição", valor: dados.condicao, icone: dados.iconeClima, cor: "bg-blue-100 dark:bg-blue-900" },
@@ -548,7 +551,6 @@
           grid.appendChild(div);
         });
 
-        // Atualizar o status box com informação adicional sobre KP
         let statusKP = '';
         if (dados.kpIndex !== "N/D") {
           statusKP = kpOk ? '' : '<br><strong>Atenção:</strong> Tempestade geomagnética (KP > 4) pode afetar o GPS';
@@ -558,10 +560,8 @@
         statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}${statusKP}`;
       };
 
-      // Exibir os dados atuais inicialmente
       atualizarDadosPrincipais(dadosAtuaisOriginais);
 
-      // Renderizar os cards de previsão
       previsao.forEach((p, idx) => {
         const textoHora = idx === 0 ? "Agora" : `${p.hora}h`;
         
@@ -591,20 +591,18 @@
 
         card.addEventListener('click', () => {
           if (idx === 0) {
-            // Se clicar no "Agora", volta para os dados originais
             atualizarDadosPrincipais(dadosAtuaisOriginais);
           } else {
-                      // Para outras horas, mostra os dados daquela hora
             const dadosHora = {
               ...p,
               rajada: Math.round(p.vento * 1.5),
-              visibilidade: 10, // Valor padrão
-              direcaoVento: "Variável", // Não temos essa info na previsão
+              visibilidade: 10,
+              direcaoVento: "Variável",
               atualizado: new Date().toLocaleTimeString(),
               localizacao: dadosAtuaisOriginais.localizacao,
               iconeClima: p.iconeClima,
               condicao: p.condicao,
-              kpIndex: dadosAtuaisOriginais.kpIndex // Mantém o mesmo KP
+              kpIndex: dadosAtuaisOriginais.kpIndex
             };
             atualizarDadosPrincipais(dadosHora);
           }
@@ -621,6 +619,121 @@
       if (amarelo) return "bg-yellow-300 dark:bg-yellow-700";
       return "bg-red-300 dark:bg-red-700";
     }
+
+    // Função para coletar dados do grid
+    function coletarDadosAtuaisDoGrid() {
+      const cards = grid.querySelectorAll(':scope > div');
+      if (!cards.length) return null;
+
+      const dados = {
+        localizacao: ultimaBusca?.cidade || cityInput.value || "--",
+        condicao: "--",
+        temp: "-- °C",
+        umidade: "-- %",
+        pontoOrvalho: "-- °C",
+        deltaT: "-- °C",
+        vento: "-- km/h",
+        direcaoVento: "",
+        rajada: "-- km/h",
+        chuva: "-- mm",
+        visibilidade: "-- km",
+        atualizado: new Date().toLocaleTimeString()
+      };
+
+      cards.forEach(card => {
+        const nomeElement = card.querySelector('.font-bold');
+        if (!nomeElement) return;
+        
+        const nome = nomeElement.textContent.trim();
+        const valorElement = card.querySelector('.font-bold ~ div:not(.fa)');
+        if (!valorElement) return;
+        
+        const valor = valorElement.textContent.trim();
+        
+        switch(nome) {
+          case "Condição":
+            dados.condicao = valor;
+            break;
+          case "Temperatura":
+            dados.temp = valor.includes("°C") ? valor : valor + " °C";
+            break;
+          case "Umidade":
+            dados.umidade = valor.includes("%") ? valor : valor + " %";
+            break;
+          case "Ponto de Orvalho":
+            dados.pontoOrvalho = valor.includes("°C") ? valor : valor + " °C";
+            break;
+          case "Delta T":
+            dados.deltaT = valor.includes("°C") ? valor : valor + " °C";
+            break;
+          case "Vento":
+            dados.vento = valor.includes("km/h") ? valor.split(" km/h")[0] + " km/h" : valor + " km/h";
+            const parts = valor.split(" ");
+            if (parts.length > 2) {
+              dados.direcaoVento = parts.slice(2).join(" ");
+            }
+            break;
+          case "Rajadas":
+            dados.rajada = valor.includes("km/h") ? valor : valor + " km/h";
+            break;
+          case "Chuva":
+            dados.chuva = valor.includes("mm") ? valor : valor + " mm";
+            break;
+          case "Visibilidade":
+            dados.visibilidade = valor.includes("km") ? valor : valor + " km";
+            break;
+          case "Atualizado":
+            dados.atualizado = valor;
+            break;
+        }
+      });
+
+      return dados;
+    }
+
+    // Função para gerar o relatório Excel
+    function gerarRelatorioExcelDeDadosAtuais(dados) {
+      const linhas = [
+        ["Relatório Bom para Voar - Informações Meteorológicas"],
+        ["Gerado em:", new Date().toLocaleString()],
+        ["Localização:", dados.localizacao],
+        [],
+        ["DADOS ATUAIS"],
+        ["Condição", dados.condicao],
+        ["Temperatura", dados.temp],
+        ["Umidade", dados.umidade],
+        ["Ponto de Orvalho", dados.pontoOrvalho],
+        ["Delta T", dados.deltaT],
+        ["Vento", dados.vento + (dados.direcaoVento ? " " + dados.direcaoVento : "")],
+        ["Rajadas", dados.rajada],
+        ["Chuva", dados.chuva],
+        ["Visibilidade", dados.visibilidade],
+        ["Atualizado", dados.atualizado]
+      ];
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(linhas);
+
+      ws["!cols"] = [{ wch: 20 }, { wch: 25 }];
+      ws["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+        { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, "Dados Atuais");
+      XLSX.writeFile(wb, `Relatorio_Bom_para_Voar_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    // Evento para o botão de download
+    document.getElementById('downloadReport').addEventListener('click', () => {
+      const dados = coletarDadosAtuaisDoGrid();
+      if (!dados) {
+        mostrarStatus("Nenhum dado disponível para exportar", "error");
+        return;
+      }
+      gerarRelatorioExcelDeDadosAtuais(dados);
+      mostrarStatus("Relatório gerado com sucesso!", "success");
+    });
   </script>
 </body>
-</html> 
+</html>
