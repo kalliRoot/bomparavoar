@@ -140,6 +140,96 @@
     
     <h2 class="text-xl font-bold mb-4">Próximas Horas</h2>
     <div id="forecastGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+
+    <!-- =================================================================== -->
+    <!-- RELATÓRIO DA APLICAÇÃO (formulário no fim da página)                -->
+    <!-- =================================================================== -->
+    <div class="border-t-2 border-gray-300 dark:border-gray-600 my-6"></div>
+
+    <h2 class="text-xl font-bold mb-3">📑 Relatório da Aplicação</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Identificação -->
+      <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
+        <h3 class="font-semibold mb-3">Identificação</h3>
+        <label class="block text-sm mb-1">Nome do Piloto</label>
+        <input id="pilotoNome" type="text" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: João Silva">
+
+        <label class="block text-sm mt-3 mb-1">Modelo do Drone</label>
+        <input id="droneModelo" type="text" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: EAV 60X">
+
+        <label class="block text-sm mt-3 mb-1">Local da Pulverização</label>
+        <input id="localPulv" type="text" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: Fazenda Boa Vista - Talhão 3">
+
+        <label class="block text-sm mt-3 mb-1">Data/Hora da Aplicação</label>
+        <input id="dataHoraAplicacao" type="datetime-local" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600">
+      </div>
+
+      <!-- Cultura / Aplicação -->
+      <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
+        <h3 class="font-semibold mb-3">Cultura e Aplicação</h3>
+
+        <label class="block text-sm mb-1">Tipo de Cultura</label>
+        <select id="cultura" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600"></select>
+
+        <label class="block text-sm mt-3 mb-1">Tipo de Aplicação</label>
+        <select id="tipoAplicacao" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600"></select>
+
+        <label class="block text-sm mt-3 mb-1">Produto</label>
+        <select id="produto" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600"></select>
+
+        <label class="block text-sm mt-3 mb-1">Dosagem do Produto (mL/ha ou L/ha)</label>
+        <input id="dosagemProduto" type="number" step="0.01" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 0.5">
+
+        <label class="block text-sm mt-3 mb-1">Quantidade de Água (L/ha)</label>
+        <input id="quantidadeAgua" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 10">
+
+        <label class="block text-sm mt-3 mb-1">Adjuvante</label>
+        <select id="adjuvante" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600"></select>
+
+        <label class="block text-sm mt-3 mb-1">Dosagem do Adjuvante (mL/ha ou L/ha)</label>
+        <input id="dosagemAdjuvante" type="number" step="0.01" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 0.2">
+
+        <label class="block text-sm mt-3 mb-1">Área Pulverizada (ha)</label>
+        <input id="areaPulverizada" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 50">
+      </div>
+
+      <!-- Configurações do Drone -->
+      <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow md:col-span-2">
+        <h3 class="font-semibold mb-3">Configurações do Drone</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-sm mb-1">Faixa (m)</label>
+            <input id="faixa" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 7.0">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Velocidade (m/s)</label>
+            <input id="velocidade" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 5">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Altura (m)</label>
+            <input id="altura" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 3.0">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Vazão (L/ha)</label>
+            <input id="vazao" type="number" step="0.1" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Ex.: 12">
+          </div>
+        </div>
+
+        <label class="block text-sm mt-3 mb-1">Observações</label>
+        <textarea id="observacoes" rows="3" class="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" placeholder="Observações adicionais..."></textarea>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <button
+        id="downloadReportBottom"
+        class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2 mx-auto"
+        title="Baixar relatório com os dados atuais"
+      >
+        <i class="fas fa-download"></i> Baixar Relatório
+      </button>
+    </div>
   </div>
 
   <script>
@@ -153,6 +243,122 @@
     const themeIcon = document.getElementById("themeIcon");
 
     const QTD_PREVISOES = 5;
+
+    // ======================== LISTAS (opções) ========================
+    const CULTURAS = [
+      "Cana", "Milho", "Mato", "Soja", "Sorgo", "Algodão", "Café", "Feijão", 
+      "Trigo", "Arroz", "Cevada", "Citrus", "Eucalipto", "Pastagem", "Hortaliças"
+    ];
+    const TIPOS_APLICACAO = ["Fungicida", "Herbicida", "Inseticida", "Fertilizante Foliar", "Dessecante"];
+
+    const PRODUTOS = {
+      Fungicida: [
+        "Azoxistrobina", "Mancozebe", "Tebuconazol", "Trifloxistrobina", "Difenoconazol", 
+        "Pyraclostrobin", "Boscalid", "Captan", "Chlorothalonil", "Cyproconazole", 
+        "Flutriafol", "Propiconazole", "Thiophanate-methyl", "Prothioconazole", 
+        "Fluxapyroxad", "Benzovindiflupyr", "Metconazole", "Fenpropimorph", 
+        "Triadimefon", "Mefentrifluconazole", "Tetraconazole", "Epoxiconazole", 
+        "Carbendazim", "Fludioxonil", "Metalaxyl", "Thiophanate", 
+        "Azoxystrobin + Cyproconazole", "Pyraclostrobin + Epoxiconazole", 
+        "Trifloxystrobin + Prothioconazole", "Folpet", "Iprodione", "Kresoxim-methyl", 
+        "Picoxystrobin", "Pyraclostrobin + Boscalid", "Tebuconazole + Trifloxystrobin"
+      ],
+      Herbicida: [
+        "2,4-D", "Atrazina", "Glifosato", "Paraquat", "Dicamba", "Haloxifope", 
+        "Mesotrione", "S-Metolachlor", "Pendimethalin", "Cloransulam-methyl", 
+        "Imazethapyr", "Clethodim", "Fomesafen", "Flumioxazin", "Saflufenacil", 
+        "Sulfentrazone", "Diuron", "Metribuzin", "Bentazon", "Alachlor", 
+        "Acetochlor", "Trifluralin", "Clomazone", "Isoxaflutole", "Tembotrione", 
+        "Quizalofop", "Fluazifop", "Linuron", "Hexazinone", "Ametrine", 
+        "Glyphosate + 2,4-D", "Imazamox", "Imazapic", "Nicosulfuron", 
+        "Aminopyralid", "Clopyralid", "Fluroxypyr", "Oxadiazon", "Oxyfluorfen"
+      ],
+      Inseticida: [
+        "Abamectina", "Clorpirifós", "Imidacloprido", "Lambda-cialotrina", 
+        "Tiametoxam", "Lufenuron", "Acephate", "Bifenthrin", "Chlorpyrifos", 
+        "Cypermethrin", "Deltamethrin", "Emamectin benzoate", "Indoxacarb", 
+        "Methomyl", "Profenofos", "Spinosad", "Thiamethoxam", "Carbaryl", 
+        "Malathion", "Permethrin", "Fenvalerate", "Esfenvalerate", 
+        "Zeta-cypermethrin", "Chlorantraniliprole", "Flubendiamide", 
+        "Diflubenzuron", "Tebufenozide", "Methidathion", "Phosmet", 
+        "Dimethoate", "Spinetoram", "Fipronil", "Thiacloprid", "Acetamiprid", 
+        "Pymetrozine", "Novaluron", "Beta-cyfluthrin", "Imidacloprid + Beta-cyfluthrin"
+      ],
+      Fertilizante_Foliar: [
+        "Nitrato de Potássio", "Ureia", "Sulfato de Zinco", "Cloreto de Potássio", 
+        "Fosfato Monoamônico", "Fosfato Diamônico", "Sulfato de Manganês", 
+        "Sulfato de Cobre", "Ácido Bórico", "Molibdato de Sódio", "Quelato de Ferro", 
+        "Quelato de Zinco", "Quelato de Manganês", "Aminoácidos", "Extrato de Algas", 
+        "Nitrofosfato", "Sulfato de Magnésio", "Cloreto de Cálcio", "Fosfito de Potássio", 
+        "Sulfato Ferroso"
+      ],
+      Dessecante: [
+        "Paraquat", "Diquat", "Glufosinato de Amônio", "Saflufenacil", 
+        "Carfentrazone", "Flumioxazin", "Glyphosate", "Sulfentrazone", 
+        "Clethodim", "2,4-D"
+      ]
+    };
+
+    const ADJUVANTES = [
+      "Óleo mineral", "Óleo vegetal", "Espalhante adesivo", "Redutor de deriva", 
+      "Condicionador de calda", "Silicone", "Surfactante não iônico", 
+      "Surfactante catiônico", "Emulsionante", "Dispersante", "Antiespumante"
+    ];
+
+    // ======================== HELPERS DE FORM ========================
+    function popularSelect(id, opcoes) {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      sel.innerHTML = '<option value="">Selecione...</option>' +
+        opcoes.map(o => `<option value="${o}">${o}</option>`).join("");
+    }
+
+    function popularProdutosPorTipo() {
+      const tipo = document.getElementById("tipoAplicacao").value;
+      const lista = tipo && PRODUTOS[tipo.replace(" ", "_")] ? PRODUTOS[tipo.replace(" ", "_")] : [];
+      popularSelect("produto", lista);
+    }
+
+    // Popular selects ao carregar
+    document.addEventListener("DOMContentLoaded", () => {
+      popularSelect("cultura", CULTURAS);
+      popularSelect("tipoAplicacao", TIPOS_APLICACAO);
+      popularSelect("adjuvante", ADJUVANTES);
+      popularProdutosPorTipo();
+    });
+
+    document.getElementById("tipoAplicacao")?.addEventListener("change", popularProdutosPorTipo);
+
+    // Lê os dados do formulário
+    function coletarDadosAplicacao() {
+      const get = id => (document.getElementById(id)?.value || "").trim();
+
+      const dados = {
+        piloto: get("pilotoNome"),
+        droneModelo: get("droneModelo"),
+        localPulv: get("localPulv"),
+        dataHoraAplicacao: get("dataHoraAplicacao"),
+        cultura: get("cultura"),
+        tipoAplicacao: get("tipoAplicacao"),
+        produto: get("produto"),
+        dosagemProduto: get("dosagemProduto"),
+        quantidadeAgua: get("quantidadeAgua"),
+        adjuvante: get("adjuvante"),
+        dosagemAdjuvante: get("dosagemAdjuvante"),
+        areaPulverizada: get("areaPulverizada"),
+        faixa: get("faixa"),
+        velocidade: get("velocidade"),
+        altura: get("altura"),
+        vazao: get("vazao"),
+        observacoes: get("observacoes")
+      };
+      return dados;
+    }
+
+    // Verifica se há ao menos UM campo preenchido
+    function temAplicacaoPreenchida(apl) {
+      return Object.values(apl).some(v => v && String(v).trim() !== "");
+    }
 
     // Tema
     const savedTheme = localStorage.getItem('theme') || 
@@ -691,8 +897,10 @@
       return dados;
     }
 
-    // Função para gerar o relatório Excel
     function gerarRelatorioExcelDeDadosAtuais(dados) {
+      const apl = coletarDadosAplicacao();
+      const incluirAplicacao = temAplicacaoPreenchida(apl);
+
       const linhas = [
         ["Relatório Bom para Voar - Informações Meteorológicas"],
         ["Gerado em:", new Date().toLocaleString()],
@@ -711,16 +919,45 @@
         ["Atualizado", dados.atualizado]
       ];
 
+      if (incluirAplicacao) {
+        linhas.push(
+          [],
+          ["RELATÓRIO DA APLICAÇÃO"],
+          ["Piloto", apl.piloto || "-"],
+          ["Modelo do Drone", apl.droneModelo || "-"],
+          ["Local da Pulverização", apl.localPulv || "-"],
+          ["Data/Hora da Aplicação", apl.dataHoraAplicacao || "-"],
+          ["Cultura", apl.cultura || "-"],
+          ["Tipo de Aplicação", apl.tipoAplicacao || "-"],
+          ["Produto", apl.produto || "-"],
+          ["Dosagem do Produto (mL/ha ou L/ha)", apl.dosagemProduto || "-"],
+          ["Quantidade de Água (L/ha)", apl.quantidadeAgua || "-"],
+          ["Adjuvante", apl.adjuvante || "-"],
+          ["Dosagem do Adjuvante (mL/ha ou L/ha)", apl.dosagemAdjuvante || "-"],
+          ["Área Pulverizada (ha)", apl.areaPulverizada || "-"],
+          ["Faixa (m)", apl.faixa || "-"],
+          ["Velocidade (m/s)", apl.velocidade || "-"],
+          ["Altura (m)", apl.altura || "-"],
+          ["Vazão (L/ha)", apl.vazao || "-"],
+          ["Observações", apl.observacoes || "-"]
+        );
+      }
+
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(linhas);
 
-      ws["!cols"] = [{ wch: 20 }, { wch: 25 }];
+      ws["!cols"] = [{ wch: 28 }, { wch: 40 }];
       ws["!merges"] = [
         { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
         { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
       ];
+      if (incluirAplicacao) {
+        // mesclar título "RELATÓRIO DA APLICAÇÃO"
+        const idxTituloApl = linhas.findIndex(r => r[0] === "RELATÓRIO DA APLICAÇÃO");
+        if (idxTituloApl >= 0) ws["!merges"].push({ s: { r: idxTituloApl, c: 0 }, e: { r: idxTituloApl, c: 1 } });
+      }
 
-      XLSX.utils.book_append_sheet(wb, ws, "Dados Atuais");
+      XLSX.utils.book_append_sheet(wb, ws, "Dados");
       XLSX.writeFile(wb, `Relatorio_Bom_para_Voar_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
@@ -734,6 +971,17 @@
       gerarRelatorioExcelDeDadosAtuais(dados);
       mostrarStatus("Relatório gerado com sucesso!", "success");
     });
+
+    document.getElementById('downloadReportBottom').addEventListener('click', () => {
+      const dados = coletarDadosAtuaisDoGrid();
+      if (!dados) {
+        mostrarStatus("Nenhum dado disponível para exportar", "error");
+        return;
+      }
+      gerarRelatorioExcelDeDadosAtuais(dados);
+      mostrarStatus("Relatório gerado com sucesso!", "success");
+    });
+    
   </script>
 </body>
 </html>
