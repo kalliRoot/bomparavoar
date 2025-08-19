@@ -422,7 +422,7 @@
       addProductButton.addEventListener("click", addProduct);
     });
 
-  function coletarDadosAplicacao() {
+    function coletarDadosAplicacao() {
       const get = id => (document.getElementById(id)?.value || "").trim();
       const products = [];
       document.querySelectorAll('.product-section').forEach(section => {
@@ -494,7 +494,7 @@
         if (sugestaoAbortCtrl) sugestaoAbortCtrl.abort();
         sugestaoAbortCtrl = new AbortController();
         const resp = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(termo)}&limit=7&accept-language=pt-BR`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(termo)}&limit=7&addressdetails=1&accept-language=pt-BR`,
           { signal: sugestaoAbortCtrl.signal, headers: { "Accept": "application/json" } }
         );
         const dados = await resp.json();
@@ -509,7 +509,9 @@
           div.className = "suggestion-item";
           div.textContent = item.display_name;
           div.onclick = () => {
-            cityInput.value = item.display_name;
+            const cidade = item.address.city || item.address.town || item.address.municipality || item.address.county || "Local Desconhecido";
+            const bairro = item.address.village || item.address.suburb || item.address.neighbourhood || "";
+            cityInput.value = bairro ? `${cidade} - ${bairro}` : cidade;
             citySuggestions.style.display = "none";
             citySuggestions.classList.add("hidden");
             buscarPorCidade();
@@ -562,6 +564,66 @@
       };
     }
 
+    async function obterNomeCidade(lat, lon) {
+      const cacheKey = `cidade_${lat.toFixed(4)}_${lon.toFixed(4)}`;
+      const cachedCidade = localStorage.getItem(cacheKey);
+      if (cachedCidade) return cachedCidade;
+
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=pt-BR`);
+        const data = await response.json();
+        const cidade = data.address.city || data.address.town || data.address.municipality || data.address.county || "Local Desconhecido";
+        const bairro = data.address.village || data.address.suburb || data.address.neighbourhood || "";
+        const localizacao = bairro ? `${cidade} - ${bairro}` : cidade;
+        localStorage.setItem(cacheKey, localizacao);
+        return localizacao;
+      } catch (error) {
+        console.error('Erro ao obter nome da cidade:', error);
+        return "Local Desconhecido";
+      }
+    }
+
+    async function buscarPorCidade() {
+      const cidadeInputValue = cityInput.value.trim();
+      if (!cidadeInputValue) {
+        mostrarStatus('Digite uma cidade para buscar', 'warning');
+        return;
+      }
+
+      mostrarStatus(`Buscando dados para ${cidadeInputValue}...`, 'info');
+
+      try {
+        const coords = await obterCoordenadasCidadeAPI(cidadeInputValue);
+        if (coords) {
+          const cidadeDetalhada = await obterNomeCidade(coords.lat, coords.lon);
+          cityInput.value = cidadeDetalhada;
+          await buscarDadosMeteorologicos(coords.lat, coords.lon, cidadeDetalhada);
+        } else {
+          mostrarStatus('Cidade não encontrada', 'error');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar cidade:', error);
+        mostrarStatus('Erro ao buscar dados da cidade', 'error');
+      }
+    }
+
+    async function obterCoordenadasCidadeAPI(cidade) {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidade)}&limit=1&addressdetails=1&accept-language=pt-BR`);
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          return {
+            lat: parseFloat(data[0].lat),
+            lon: parseFloat(data[0].lon)
+          };
+        }
+        return null;
+      } catch (error) {
+        console.error('Erro na geocodificação:', error);
+        return null;
+      }
+    }
+
     const solicitarLocalizacaoDebounced = debounce(async function() {
       mostrarStatus('Obtendo sua localização...', 'info');
       locationButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Buscando...';
@@ -592,10 +654,10 @@
           lon: position.coords.longitude
         };
         
-        const cidade = await obterNomeCidade(position.coords.latitude, position.coords.longitude);
-        cityInput.value = cidade;
+        const localizacao = await obterNomeCidade(position.coords.latitude, position.coords.longitude);
+        cityInput.value = localizacao;
         
-        await buscarDadosMeteorologicos(position.coords.latitude, position.coords.longitude, cidade);
+        await buscarDadosMeteorologicos(position.coords.latitude, position.coords.longitude, localizacao);
       } catch (error) {
         console.error('Erro na geolocalização:', error);
         mostrarStatus('Não foi possível obter sua localização. Verifique as permissões do navegador.', 'error');
@@ -607,64 +669,6 @@
 
     locationButton.addEventListener('click', solicitarLocalizacaoDebounced);
 
-    async function obterNomeCidade(lat, lon) {
-      const cacheKey = `cidade_${lat.toFixed(4)}_${lon.toFixed(4)}`;
-      const cachedCidade = localStorage.getItem(cacheKey);
-      if (cachedCidade) return cachedCidade;
-
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&accept-language=pt-BR`);
-        const data = await response.json();
-        const cidade = data.address.village || data.address.suburb || data.address.neighbourhood || 
-                       data.address.city || data.address.town || data.address.municipality || 
-                       data.address.county || "Local Desconhecido";
-        localStorage.setItem(cacheKey, cidade);
-        return cidade;
-      } catch (error) {
-        console.error('Erro ao obter nome da cidade:', error);
-        return "Local Desconhecido";
-      }
-    }
-
-    async function buscarPorCidade() {
-      const cidade = cityInput.value.trim();
-      if (!cidade) {
-        mostrarStatus('Digite uma cidade para buscar', 'warning');
-        return;
-      }
-
-      mostrarStatus(`Buscando dados para ${cidade}...`, 'info');
-
-      try {
-        const coords = await obterCoordenadasCidadeAPI(cidade);
-        if (coords) {
-          await buscarDadosMeteorologicos(coords.lat, coords.lon, cidade);
-        } else {
-          mostrarStatus('Cidade não encontrada', 'error');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar cidade:', error);
-        mostrarStatus('Erro ao buscar dados da cidade', 'error');
-      }
-    }
-
-    async function obterCoordenadasCidadeAPI(cidade) {
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidade)}&limit=1&accept-language=pt-BR`);
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          return {
-            lat: parseFloat(data[0].lat),
-            lon: parseFloat(data[0].lon)
-          };
-        }
-        return null;
-      } catch (error) {
-        console.error('Erro na geocodificação:', error);
-        return null;
-      }
-    }
-
     function calcularPontoOrvalho(temp, umidade) {
       if (!temp || !umidade || umidade < 0 || umidade > 100) return null;
       const a = 17.27;
@@ -674,7 +678,7 @@
       return pontoOrvalho.toFixed(1);
     }
 
-    async function buscarDadosMeteorologicos(lat, lon, cidade) {
+    async function buscarDadosMeteorologicos(lat, lon, localizacao) {
       try {
         const meteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m,windgusts_10m&timezone=auto`);
         const meteoData = await meteoResponse.json();
@@ -735,7 +739,7 @@
             };
           });
 
-      const dados = {
+        const dados = {
           atual: {
             condicao: interpretarWeatherCode(meteoData.current_weather.weathercode),
             iconeClima: obterIconeDoWeatherCode(meteoData.current_weather.weathercode),
@@ -750,14 +754,14 @@
             deltaT: deltaT,
             kpIndex: kpIndex,
             atualizado: agora.toLocaleTimeString(),
-            localizacao: cidade
+            localizacao: localizacao
           },
           previsao
         };
         
         exibirDados(dados.atual, dados.previsao);
-        ultimaBusca = { lat, lon, cidade };
-        usandoGPS = !!cidade;
+        ultimaBusca = { lat, lon, cidade: localizacao };
+        usandoGPS = !!localizacao;
       } catch (error) {
         console.error('Erro na API meteorológica:', error);
         const cachedData = localStorage.getItem('ultimosDadosMeteo');
@@ -813,14 +817,14 @@
                 deltaT: deltaT,
                 kpIndex: "N/D",
                 atualizado: agora.toLocaleTimeString(),
-                localizacao: cidade
+                localizacao: localizacao
               },
               previsao
             };
             
             exibirDados(dados.atual, dados.previsao);
-            ultimaBusca = { lat, lon, cidade };
-            usandoGPS = !!cidade;
+            ultimaBusca = { lat, lon, cidade: localizacao };
+            usandoGPS = !!localizacao;
           } else {
             mostrarStatus('Erro ao buscar dados meteorológicos', 'error');
           }
@@ -984,6 +988,7 @@
           umidade: p.umidade >= 40 && p.umidade <= 70,
           deltaT: p.deltaT !== "N/D" && p.deltaT >= 2 && p.deltaT <= 10
         };
+        
         const okCountHora = Object.values(condicoesHora).filter(Boolean).length;
         let statusCorHora = '';
         
