@@ -265,18 +265,21 @@
       </button>
     </div>
   </div>
-
-  <script>
-    const grid = document.getElementById("grid");
-    const forecastGrid = document.getElementById("forecastGrid");
-    const statusBox = document.getElementById("status");
-    const cityInput = document.getElementById("cityInput");
-    const citySuggestions = document.getElementById("citySuggestions");
-    const locationButton = document.getElementById("locationButton");
-    const themeToggle = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-    const productsContainer = document.getElementById("productsContainer");
-    const addProductButton = document.getElementById("addProduct");
+  
+ <!-- Script do Vercel Analytics -->
+  <script defer src="https://va.vercel.app/script.js" data-site-id="SEU_SITE_ID_AQUI"></script>
+</body>
+<script>
+  const grid = document.getElementById("grid");
+  const forecastGrid = document.getElementById("forecastGrid");
+  const statusBox = document.getElementById("status");
+  const cityInput = document.getElementById("cityInput");
+  const citySuggestions = document.getElementById("citySuggestions");
+  const locationButton = document.getElementById("locationButton");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const productsContainer = document.getElementById("productsContainer");
+  const addProductButton = document.getElementById("addProduct");
 
     const QTD_PREVISOES = 5;
 
@@ -1222,7 +1225,6 @@
       }
       gerarRelatorioExcelDeDadosAtuais(dados);
       mostrarStatus("Relatório gerado com sucesso!", "success");
-    });
-    
-</body>
+});
+</script>
 </html>
