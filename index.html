@@ -266,967 +266,972 @@
     </div>
   </div>
 
-  <!-- Biblioteca SheetJS para download do Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
   <!-- Script do Vercel Analytics -->
   <script defer src="https://va.vercel.app/script.js" data-site-id="prj_SkeShTMB77FJI0Be3LjaK9zij71n"></script>
+</body>
+<script>
+  const grid = document.getElementById("grid");
+  const forecastGrid = document.getElementById("forecastGrid");
+  const statusBox = document.getElementById("status");
+  const cityInput = document.getElementById("cityInput");
+  const citySuggestions = document.getElementById("citySuggestions");
+  const locationButton = document.getElementById("locationButton");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.getElementById("themeIcon");
+  const productsContainer = document.getElementById("productsContainer");
+  const addProductButton = document.getElementById("addProduct");
 
-  <script>
-    const grid = document.getElementById("grid");
-    const forecastGrid = document.getElementById("forecastGrid");
-    const statusBox = document.getElementById("status");
-    const cityInput = document.getElementById("cityInput");
-    const citySuggestions = document.getElementById("citySuggestions");
-    const locationButton = document.getElementById("locationButton");
-    const themeToggle = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-    const productsContainer = document.getElementById("productsContainer");
-    const addProductButton = document.getElementById("addProduct");
-    const QTD_PREVISOES = 5;
+  const QTD_PREVISOES = 5;
 
-    // LISTAS
-    const CULTURAS = [
-      "Cana", "Milho", "Mato", "Soja", "Sorgo", "Algodão", "Café", "Feijão", 
-      "Trigo", "Arroz", "Cevada", "Citrus", "Eucalipto", "Pastagem", "Hortaliças"
-    ];
-    const TIPOS_APLICACAO = ["Fungicida", "Herbicida", "Inseticida", "Fertilizante Foliar", "Dessecante"];
-    const PRODUTOS = {
-      Fungicida: [
-        "Azoxistrobina", "Mancozebe", "Tebuconazol", "Trifloxistrobina", "Difenoconazol", 
-        "Pyraclostrobin", "Boscalid", "Captan", "Chlorothalonil", "Cyproconazole", 
-        "Flutriafol", "Propiconazole", "Thiophanate-methyl", "Prothioconazole", 
-        "Fluxapyroxad", "Benzovindiflupyr", "Metconazole", "Fenpropimorph", 
-        "Triadimefon", "Mefentrifluconazole", "Tetraconazole", "Epoxiconazole", 
-        "Carbendazim", "Fludioxonil", "Metalaxyl", "Thiophanate", 
-        "Azoxystrobin + Cyproconazole", "Pyraclostrobin + Epoxiconazole", 
-        "Trifloxystrobin + Prothioconazole", "Folpet", "Iprodione", "Kresoxim-methyl", 
-        "Picoxystrobin", "Pyraclostrobin + Boscalid", "Tebuconazole + Trifloxystrobin"
-      ],
-      Herbicida: [
-        "2,4-D", "Atrazina", "Glifosato", "Paraquat", "Dicamba", "Haloxifope", 
-        "Mesotrione", "S-Metolachlor", "Pendimethalin", "Cloransulam-methyl", 
-        "Imazethapyr", "Clethodim", "Fomesafen", "Flumioxazin", "Saflufenacil", 
-        "Sulfentrazone", "Diuron", "Metribuzin", "Bentazon", "Alachlor", 
-        "Acetochlor", "Trifluralin", "Clomazone", "Isoxaflutole", "Tembotrione", 
-        "Quizalofop", "Fluazifop", "Linuron", "Hexazinone", "Ametrine", 
-        "Glyphosate + 2,4-D", "Imazamox", "Imazapic", "Nicosulfuron", 
-        "Aminopyralid", "Clopyralid", "Fluroxypyr", "Oxadiazon", "Oxyfluorfen"
-      ],
-      Inseticida: [
-        "Abamectina", "Clorpirifós", "Imidacloprido", "Lambda-cialotrina", 
-        "Tiametoxam", "Lufenuron", "Acephate", "Bifenthrin", "Chlorpyrifos", 
-        "Cypermethrin", "Deltamethrin", "Emamectin benzoate", "Indoxacarb", 
-        "Methomyl", "Profenofos", "Spinosad", "Thiamethoxam", "Carbaryl", 
-        "Malathion", "Permethrin", "Fenvalerate", "Esfenvalerate", 
-        "Zeta-cypermethrin", "Chlorantraniliprole", "Flubendiamide", 
-        "Diflubenzuron", "Tebufenozide", "Methidathion", "Phosmet", 
-        "Dimethoate", "Spinetoram", "Fipronil", "Thiacloprid", "Acetamiprid", 
-        "Pymetrozine", "Novaluron", "Beta-cyfluthrin", "Imidacloprid + Beta-cyfluthrin"
-      ],
-      Fertilizante_Foliar: [
-        "Nitrato de Potássio", "Ureia", "Sulfato de Zinco", "Cloreto de Potássio", 
-        "Fosfato Monoamônico", "Fosfato Diamônico", "Sulfato de Manganês", 
-        "Sulfato de Cobre", "Ácido Bórico", "Molibdato de Sódio", "Quelato de Ferro", 
-        "Quelato de Zinco", "Quelato de Manganês", "Aminoácidos", "Extrato de Algas", 
-        "Nitrofosfato", "Sulfato de Magnésio", "Cloreto de Cálcio", "Fosfito de Potássio", 
-        "Sulfato Ferroso"
-      ],
-      Dessecante: [
-        "Paraquat", "Diquat", "Glufosinato de Amônio", "Saflufenacil", 
-        "Carfentrazone", "Flumioxazin", "Glyphosate", "Sulfentrazone", 
-        "Clethodim", "2,4-D"
-      ]
+  // LISTAS
+  const CULTURAS = [
+    "Cana", "Milho", "Mato", "Soja", "Sorgo", "Algodão", "Café", "Feijão", 
+    "Trigo", "Arroz", "Cevada", "Citrus", "Eucalipto", "Pastagem", "Hortaliças"
+  ];
+  const TIPOS_APLICACAO = ["Fungicida", "Herbicida", "Inseticida", "Fertilizante Foliar", "Dessecante"];
+  const PRODUTOS = {
+    Fungicida: [
+      "Azoxistrobina", "Mancozebe", "Tebuconazol", "Trifloxistrobina", "Difenoconazol", 
+      "Pyraclostrobin", "Boscalid", "Captan", "Chlorothalonil", "Cyproconazole", 
+      "Flutriafol", "Propiconazole", "Thiophanate-methyl", "Prothioconazole", 
+      "Fluxapyroxad", "Benzovindiflupyr", "Metconazole", "Fenpropimorph", 
+      "Triadimefon", "Mefentrifluconazole", "Tetraconazole", "Epoxiconazole", 
+      "Carbendazim", "Fludioxonil", "Metalaxyl", "Thiophanate", 
+      "Azoxystrobin + Cyproconazole", "Pyraclostrobin + Epoxiconazole", 
+      "Trifloxystrobin + Prothioconazole", "Folpet", "Iprodione", "Kresoxim-methyl", 
+      "Picoxystrobin", "Pyraclostrobin + Boscalid", "Tebuconazole + Trifloxystrobin"
+    ],
+    Herbicida: [
+      "2,4-D", "Atrazina", "Glifosato", "Paraquat", "Dicamba", "Haloxifope", 
+      "Mesotrione", "S-Metolachlor", "Pendimethalin", "Cloransulam-methyl", 
+      "Imazethapyr", "Clethodim", "Fomesafen", "Flumioxazin", "Saflufenacil", 
+      "Sulfentrazone", "Diuron", "Metribuzin", "Bentazon", "Alachlor", 
+      "Acetochlor", "Trifluralin", "Clomazone", "Isoxaflutole", "Tembotrione", 
+      "Quizalofop", "Fluazifop", "Linuron", "Hexazinone", "Ametrine", 
+      "Glyphosate + 2,4-D", "Imazamox", "Imazapic", "Nicosulfuron", 
+      "Aminopyralid", "Clopyralid", "Fluroxypyr", "Oxadiazon", "Oxyfluorfen"
+    ],
+    Inseticida: [
+      "Abamectina", "Clorpirifós", "Imidacloprido", "Lambda-cialotrina", 
+      "Tiametoxam", "Lufenuron", "Acephate", "Bifenthrin", "Chlorpyrifos", 
+      "Cypermethrin", "Deltamethrin", "Emamectin benzoate", "Indoxacarb", 
+      "Methomyl", "Profenofos", "Spinosad", "Thiamethoxam", "Carbaryl", 
+      "Malathion", "Permethrin", "Fenvalerate", "Esfenvalerate", 
+      "Zeta-cypermethrin", "Chlorantraniliprole", "Flubendiamide", 
+      "Diflubenzuron", "Tebufenozide", "Methidathion", "Phosmet", 
+      "Dimethoate", "Spinetoram", "Fipronil", "Thiacloprid", "Acetamiprid", 
+      "Pymetrozine", "Novaluron", "Beta-cyfluthrin", "Imidacloprid + Beta-cyfluthrin"
+    ],
+    Fertilizante_Foliar: [
+      "Nitrato de Potássio", "Ureia", "Sulfato de Zinco", "Cloreto de Potássio", 
+      "Fosfato Monoamônico", "Fosfato Diamônico", "Sulfato de Manganês", 
+      "Sulfato de Cobre", "Ácido Bórico", "Molibdato de Sódio", "Quelato de Ferro", 
+      "Quelato de Zinco", "Quelato de Manganês", "Aminoácidos", "Extrato de Algas", 
+      "Nitrofosfato", "Sulfato de Magnésio", "Cloreto de Cálcio", "Fosfito de Potássio", 
+      "Sulfato Ferroso"
+    ],
+    Dessecante: [
+      "Paraquat", "Diquat", "Glufosinato de Amônio", "Saflufenacil", 
+      "Carfentrazone", "Flumioxazin", "Glyphosate", "Sulfentrazone", 
+      "Clethodim", "2,4-D"
+    ]
+  };
+  const ADJUVANTES = [
+    "Óleo mineral", "Óleo vegetal", "Espalhante adesivo", "Redutor de deriva", 
+    "Condicionador de calda", "Silicone", "Surfactante não iônico", 
+    "Surfactante catiônico", "Emulsionante", "Dispersante", "Antiespumante"
+  ];
+
+  // HELPERS DE FORM
+  function popularSelect(id, opcoes, classe = '') {
+    const sel = classe ? document.querySelector(`.${classe}[data-product-id="${id}"]`) : document.getElementById(id);
+    if (!sel) {
+      console.error(`Elemento não encontrado: ${classe || id}, productId: ${id}`);
+      return;
+    }
+    sel.innerHTML = '<option value="">Selecione...</option>' +
+      opcoes.map(o => `<option value="${o}">${o}</option>`).join("");
+    console.log(`Dropdown ${classe || id} preenchido com ${opcoes.length} opções`);
+  }
+
+  function popularProdutosPorTipo(productId) {
+    console.log(`Tentando popular produtos para productId: ${productId}`);
+    const tipoElement = document.querySelector(`.tipoAplicacao[data-product-id="${productId}"]`);
+    if (!tipoElement) {
+      console.error(`Elemento .tipoAplicacao[data-product-id="${productId}"] não encontrado`);
+      return;
+    }
+    const tipo = tipoElement.value;
+    console.log(`Tipo selecionado: ${tipo}`);
+    const lista = tipo && PRODUTOS[tipo.replace(" ", "_")] ? PRODUTOS[tipo.replace(" ", "_")] : [];
+    console.log(`Lista de produtos: ${lista.join(", ")}`);
+    popularSelect(productId, lista, 'produto');
+    if (lista.length === 0) {
+      console.warn(`Nenhuma lista de produtos encontrada para o tipo: ${tipo}`);
+    }
+  }
+
+  function addProduct() {
+    const productCount = productsContainer.querySelectorAll('.product-section').length + 1;
+    if (productCount > 5) {
+      mostrarStatus("Limite máximo de 5 produtos atingido", "warning");
+      return;
+    }
+
+    console.log(`Adicionando produto ${productCount}`);
+    const productSection = document.createElement("div");
+    productSection.className = "product-section";
+    productSection.dataset.productId = productCount;
+    productSection.innerHTML = `
+      <div class="product-header">
+        <h4 class="font-semibold">Produto ${productCount}</h4>
+        <i class="fas fa-trash remove-product" onclick="removeProduct(${productCount})"></i>
+      </div>
+      <label class="block text-sm mb-1">Tipo de Aplicação</label>
+      <select class="tipoAplicacao w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" onchange="popularProdutosPorTipo(${productCount})"></select>
+
+      <label class="block text-sm mt-3 mb-1">Produto</label>
+      <select class="produto w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}"></select>
+
+      <label class="block text-sm mt-3 mb-1">Dosagem do Produto (mL/ha ou L/ha)</label>
+      <input class="dosagemProduto w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" type="number" step="0.01" min="0" placeholder="Ex.: 0.5">
+
+      <label class="block text-sm mt-3 mb-1">Adjuvante</label>
+      <select class="adjuvante w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}"></select>
+
+      <label class="block text-sm mt-3 mb-1">Dosagem do Adjuvante (mL/ha ou L/ha)</label>
+      <input class="dosagemAdjuvante w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" type="number" step="0.01" min="0" placeholder="Ex.: 0.2">
+    `;
+    productsContainer.appendChild(productSection);
+    popularSelect(productCount, TIPOS_APLICACAO, 'tipoAplicacao');
+    popularSelect(productCount, [], 'produto');
+    popularSelect(productCount, ADJUVANTES, 'adjuvante');
+  }
+
+  function removeProduct(productId) {
+    const productSection = document.querySelector(`.product-section[data-product-id="${productId}"]`);
+    if (productId !== 1) {
+      console.log(`Removendo produto ${productId}`);
+      productSection.remove();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("DOM carregado, inicializando dropdowns");
+    popularSelect("cultura", CULTURAS);
+    popularSelect(1, TIPOS_APLICACAO, 'tipoAplicacao');
+    popularSelect(1, [], 'produto');
+    popularSelect(1, ADJUVANTES, 'adjuvante');
+    addProductButton.addEventListener("click", addProduct);
+  });
+
+  function coletarDadosAplicacao() {
+    const get = id => (document.getElementById(id)?.value || "").trim();
+    const products = [];
+    document.querySelectorAll('.product-section').forEach(section => {
+      const id = section.dataset.productId;
+      const tipoAplicacao = document.querySelector(`.tipoAplicacao[data-product-id="${id}"]`)?.value || "";
+      const produto = document.querySelector(`.produto[data-product-id="${id}"]`)?.value || "";
+      const dosagemProduto = document.querySelector(`.dosagemProduto[data-product-id="${id}"]`)?.value || "";
+      const adjuvante = document.querySelector(`.adjuvante[data-product-id="${id}"]`)?.value || "";
+      const dosagemAdjuvante = document.querySelector(`.dosagemAdjuvante[data-product-id="${id}"]`)?.value || "";
+      products.push({ id, tipoAplicacao, produto, dosagemProduto, adjuvante, dosagemAdjuvante });
+    });
+
+    return {
+      piloto: get("pilotoNome"),
+      droneModelo: get("droneModelo"),
+      localPulv: get("localPulv"),
+      dataHoraAplicacao: get("dataHoraAplicacao"),
+      cultura: get("cultura"),
+      products,
+      quantidadeAgua: get("quantidadeAgua"),
+      areaPulverizada: get("areaPulverizada"),
+      faixa: get("faixa"),
+      velocidade: get("velocidade"),
+      altura: get("altura"),
+      vazao: get("vazao"),
+      observacoes: get("observacoes")
     };
-    const ADJUVANTES = [
-      "Óleo mineral", "Óleo vegetal", "Espalhante adesivo", "Redutor de deriva", 
-      "Condicionador de calda", "Silicone", "Surfactante não iônico", 
-      "Surfactante catiônico", "Emulsionante", "Dispersante", "Antiespumante"
-    ];
+  }
 
-    // HELPERS DE FORM
-    function popularSelect(id, opcoes, classe = '') {
-      const sel = classe ? document.querySelector(`.${classe}[data-product-id="${id}"]`) : document.getElementById(id);
-      if (!sel) {
-        console.error(`Elemento não encontrado: ${classe || id}, productId: ${id}`);
-        return;
-      }
-      sel.innerHTML = '<option value="">Selecione...</option>' +
-        opcoes.map(o => `<option value="${o}">${o}</option>`).join("");
-      console.log(`Dropdown ${classe || id} preenchido com ${opcoes.length} opções`);
-    }
+  function temAplicacaoPreenchida(apl) {
+    return Object.values(apl).some(v => (typeof v === 'string' && v.trim() !== "") || (Array.isArray(v) && v.length > 0 && v.some(p => p.tipoAplicacao || p.produto)));
+  }
 
-    function popularProdutosPorTipo(productId) {
-      console.log(`Tentando popular produtos para productId: ${productId}`);
-      const tipoElement = document.querySelector(`.tipoAplicacao[data-product-id="${productId}"]`);
-      if (!tipoElement) {
-        console.error(`Elemento .tipoAplicacao[data-product-id="${productId}"] não encontrado`);
-        return;
-      }
-      const tipo = tipoElement.value;
-      console.log(`Tipo selecionado: ${tipo}`);
-      const lista = tipo && PRODUTOS[tipo.replace(" ", "_")] ? PRODUTOS[tipo.replace(" ", "_")] : [];
-      console.log(`Lista de produtos: ${lista.join(", ")}`);
-      popularSelect(productId, lista, 'produto');
-      if (lista.length === 0) {
-        console.warn(`Nenhuma lista de produtos encontrada para o tipo: ${tipo}`);
-      }
-    }
+  // TEMA
+  const savedTheme = localStorage.getItem('theme') || 
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (savedTheme === 'dark') {
+    document.documentElement.classList.add('dark-mode');
+    themeIcon.classList.replace('fa-moon', 'fa-sun');
+  }
 
-    function addProduct() {
-      const productCount = productsContainer.querySelectorAll('.product-section').length + 1;
-      if (productCount > 5) {
-        mostrarStatus("Limite máximo de 5 produtos atingido", "warning");
-        return;
-      }
-
-      console.log(`Adicionando produto ${productCount}`);
-      const productSection = document.createElement("div");
-      productSection.className = "product-section";
-      productSection.dataset.productId = productCount;
-      productSection.innerHTML = `
-        <div class="product-header">
-          <h4 class="font-semibold">Produto ${productCount}</h4>
-          <i class="fas fa-trash remove-product" onclick="removeProduct(${productCount})"></i>
-        </div>
-        <label class="block text-sm mb-1">Tipo de Aplicação</label>
-        <select class="tipoAplicacao w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" onchange="popularProdutosPorTipo(${productCount})"></select>
-
-        <label class="block text-sm mt-3 mb-1">Produto</label>
-        <select class="produto w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}"></select>
-
-        <label class="block text-sm mt-3 mb-1">Dosagem do Produto (mL/ha ou L/ha)</label>
-        <input class="dosagemProduto w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" type="number" step="0.01" min="0" placeholder="Ex.: 0.5">
-
-        <label class="block text-sm mt-3 mb-1">Adjuvante</label>
-        <select class="adjuvante w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}"></select>
-
-        <label class="block text-sm mt-3 mb-1">Dosagem do Adjuvante (mL/ha ou L/ha)</label>
-        <input class="dosagemAdjuvante w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-600" data-product-id="${productCount}" type="number" step="0.01" min="0" placeholder="Ex.: 0.2">
-      `;
-      productsContainer.appendChild(productSection);
-      popularSelect(productCount, TIPOS_APLICACAO, 'tipoAplicacao');
-      popularSelect(productCount, [], 'produto');
-      popularSelect(productCount, ADJUVANTES, 'adjuvante');
-    }
-
-    function removeProduct(productId) {
-      const productSection = document.querySelector(`.product-section[data-product-id="${productId}"]`);
-      if (productId !== 1) {
-        console.log(`Removendo produto ${productId}`);
-        productSection.remove();
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      console.log("DOM carregado, inicializando dropdowns");
-      popularSelect("cultura", CULTURAS);
-      popularSelect(1, TIPOS_APLICACAO, 'tipoAplicacao');
-      popularSelect(1, [], 'produto');
-      popularSelect(1, ADJUVANTES, 'adjuvante');
-      addProductButton.addEventListener("click", addProduct);
-    });
-
-    function coletarDadosAplicacao() {
-      const get = id => (document.getElementById(id)?.value || "").trim();
-      const products = [];
-      document.querySelectorAll('.product-section').forEach(section => {
-        const id = section.dataset.productId;
-        const tipoAplicacao = document.querySelector(`.tipoAplicacao[data-product-id="${id}"]`)?.value || "";
-        const produto = document.querySelector(`.produto[data-product-id="${id}"]`)?.value || "";
-        const dosagemProduto = document.querySelector(`.dosagemProduto[data-product-id="${id}"]`)?.value || "";
-        const adjuvante = document.querySelector(`.adjuvante[data-product-id="${id}"]`)?.value || "";
-        const dosagemAdjuvante = document.querySelector(`.dosagemAdjuvante[data-product-id="${id}"]`)?.value || "";
-        products.push({ id, tipoAplicacao, produto, dosagemProduto, adjuvante, dosagemAdjuvante });
-      });
-
-      return {
-        piloto: get("pilotoNome"),
-        droneModelo: get("droneModelo"),
-        localPulv: get("localPulv"),
-        dataHoraAplicacao: get("dataHoraAplicacao"),
-        cultura: get("cultura"),
-        products,
-        quantidadeAgua: get("quantidadeAgua"),
-        areaPulverizada: get("areaPulverizada"),
-        faixa: get("faixa"),
-        velocidade: get("velocidade"),
-        altura: get("altura"),
-        vazao: get("vazao"),
-        observacoes: get("observacoes")
-      };
-    }
-
-    function temAplicacaoPreenchida(apl) {
-      return Object.values(apl).some(v => (typeof v === 'string' && v.trim() !== "") || (Array.isArray(v) && v.length > 0 && v.some(p => p.tipoAplicacao || p.produto)));
-    }
-
-    // TEMA
-    const savedTheme = localStorage.getItem('theme') || 
-                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark-mode');
+  themeToggle.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark-mode');
+    if (document.documentElement.classList.contains('dark-mode')) {
       themeIcon.classList.replace('fa-moon', 'fa-sun');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      themeIcon.classList.replace('fa-sun', 'fa-moon');
+      localStorage.setItem('theme', 'light');
+    }
+  });
+
+  let ultimaBusca = null;
+  let usandoGPS = false;
+  let ultimaLocalizacao = null;
+
+  // AUTOCOMPLETAR
+  let sugestaoAbortCtrl = null;
+  cityInput.addEventListener("input", async function() {
+    const termo = this.value.trim();
+    citySuggestions.innerHTML = "";
+    if (termo.length < 2) {
+      citySuggestions.style.display = "none";
+      citySuggestions.classList.add("hidden");
+      return;
     }
 
-    themeToggle.addEventListener('click', () => {
-      document.documentElement.classList.toggle('dark-mode');
-      if (document.documentElement.classList.contains('dark-mode')) {
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-        localStorage.setItem('theme', 'light');
-      }
-    });
-
-    let ultimaBusca = null;
-    let usandoGPS = false;
-    let ultimaLocalizacao = null;
-
-    // AUTOCOMPLETAR
-    let sugestaoAbortCtrl = null;
-    cityInput.addEventListener("input", async function() {
-      const termo = this.value.trim();
-      citySuggestions.innerHTML = "";
-      if (termo.length < 2) {
+    try {
+      if (sugestaoAbortCtrl) sugestaoAbortCtrl.abort();
+      sugestaoAbortCtrl = new AbortController();
+      const resp = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(termo)}&limit=7&addressdetails=1&accept-language=pt-BR`,
+        { signal: sugestaoAbortCtrl.signal, headers: { "Accept": "application/json" } }
+      );
+      const dados = await resp.json();
+      if (!Array.isArray(dados) || dados.length === 0) {
         citySuggestions.style.display = "none";
         citySuggestions.classList.add("hidden");
         return;
       }
 
-      try {
-        if (sugestaoAbortCtrl) sugestaoAbortCtrl.abort();
-        sugestaoAbortCtrl = new AbortController();
-        const resp = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(termo)}&limit=7&addressdetails=1&accept-language=pt-BR`,
-          { signal: sugestaoAbortCtrl.signal, headers: { "Accept": "application/json" } }
-        );
-        const dados = await resp.json();
-        if (!Array.isArray(dados) || dados.length === 0) {
+      dados.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.textContent = item.display_name;
+        div.onclick = () => {
+          const cidade = item.address.city || item.address.town || item.address.municipality || item.address.county || "Local Desconhecido";
+          const bairro = item.address.village || item.address.suburb || item.address.neighbourhood || "";
+          cityInput.value = bairro ? `${cidade} - ${bairro}` : cidade;
           citySuggestions.style.display = "none";
           citySuggestions.classList.add("hidden");
-          return;
-        }
+          buscarPorCidade();
+        };
+        citySuggestions.appendChild(div);
+      });
 
-        dados.forEach(item => {
-          const div = document.createElement("div");
-          div.className = "suggestion-item";
-          div.textContent = item.display_name;
-          div.onclick = () => {
-            const cidade = item.address.city || item.address.town || item.address.municipality || item.address.county || "Local Desconhecido";
-            const bairro = item.address.village || item.address.suburb || item.address.neighbourhood || "";
-            cityInput.value = bairro ? `${cidade} - ${bairro}` : cidade;
-            citySuggestions.style.display = "none";
-            citySuggestions.classList.add("hidden");
-            buscarPorCidade();
-          };
-          citySuggestions.appendChild(div);
-        });
+      citySuggestions.classList.remove("hidden");
+      citySuggestions.style.display = "block";
+    } catch (e) {
+      citySuggestions.style.display = "none";
+      citySuggestions.classList.add("hidden");
+    }
+  });
+  cityInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") buscarPorCidade();
+  });
 
-        citySuggestions.classList.remove("hidden");
-        citySuggestions.style.display = "block";
-      } catch (e) {
-        citySuggestions.style.display = "none";
-        citySuggestions.classList.add("hidden");
+  document.addEventListener("click", function(e) {
+    if (!citySuggestions.contains(e.target) && e.target !== cityInput) {
+      citySuggestions.style.display = "none";
+      citySuggestions.classList.add("hidden");
+    }
+  });
+
+  function mostrarStatus(mensagem, tipo = 'info') {
+    const cores = {
+      info: 'bg-gray-200 dark:bg-gray-700',
+      success: 'bg-green-400 dark:bg-green-600',
+      warning: 'bg-yellow-400 dark:bg-yellow-600',
+      error: 'bg-red-400 dark:bg-red-600'
+    };
+    const icones = {
+      info: 'fa-info-circle',
+      success: 'fa-check-circle',
+      warning: 'fa-exclamation-circle',
+      error: 'fa-exclamation-triangle'
+    };
+    
+    statusBox.className = `text-center p-4 mb-4 rounded-lg ${cores[tipo]} dark:text-white`;
+    statusBox.innerHTML = `<i class="fas ${icones[tipo]} mr-2"></i>${mensagem}`;
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  async function obterNomeCidade(lat, lon) {
+    const cacheKey = `cidade_${lat.toFixed(4)}_${lon.toFixed(4)}`;
+    const cachedCidade = localStorage.getItem(cacheKey);
+    if (cachedCidade) return cachedCidade;
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=pt-BR`);
+      const data = await response.json();
+      const cidade = data.address.city || data.address.town || data.address.municipality || data.address.county || "Local Desconhecido";
+      const bairro = data.address.village || data.address.suburb || data.address.neighbourhood || "";
+      const localizacao = bairro ? `${cidade} - ${bairro}` : cidade;
+      localStorage.setItem(cacheKey, localizacao);
+      return localizacao;
+    } catch (error) {
+      console.error('Erro ao obter nome da cidade:', error);
+      return "Local Desconhecido";
+    }
+  }
+
+  async function buscarPorCidade() {
+    const cidadeInputValue = cityInput.value.trim();
+    if (!cidadeInputValue) {
+      mostrarStatus('Digite uma cidade para buscar', 'warning');
+      return;
+    }
+
+    mostrarStatus(`Buscando dados para ${cidadeInputValue}...`, 'info');
+
+    try {
+      const coords = await obterCoordenadasCidadeAPI(cidadeInputValue);
+      if (coords) {
+        const cidadeDetalhada = await obterNomeCidade(coords.lat, coords.lon);
+        cityInput.value = cidadeDetalhada;
+        await buscarDadosMeteorologicos(coords.lat, coords.lon, cidadeDetalhada);
+      } else {
+        mostrarStatus('Cidade não encontrada', 'error');
       }
-    });
+    } catch (error) {
+      console.error('Erro ao buscar cidade:', error);
+      mostrarStatus('Erro ao buscar dados da cidade', 'error');
+    }
+  }
 
-    cityInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") buscarPorCidade();
-    });
-
-    document.addEventListener("click", function(e) {
-      if (!citySuggestions.contains(e.target) && e.target !== cityInput) {
-        citySuggestions.style.display = "none";
-        citySuggestions.classList.add("hidden");
+  async function obterCoordenadasCidadeAPI(cidade) {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidade)}&limit=1&addressdetails=1&accept-language=pt-BR`);
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lon: parseFloat(data[0].lon)
+        };
       }
-    });
+      return null;
+    } catch (error) {
+      console.error('Erro na geocodificação:', error);
+      return null;
+    }
+  }
 
-    function mostrarStatus(mensagem, tipo = 'info') {
-      const cores = {
-        info: 'bg-gray-200 dark:bg-gray-700',
-        success: 'bg-green-400 dark:bg-green-600',
-        warning: 'bg-yellow-400 dark:bg-yellow-600',
-        error: 'bg-red-400 dark:bg-red-600'
-      };
-      const icones = {
-        info: 'fa-info-circle',
-        success: 'fa-check-circle',
-        warning: 'fa-exclamation-circle',
-        error: 'fa-exclamation-triangle'
+  const solicitarLocalizacaoDebounced = debounce(async function() {
+    mostrarStatus('Obtendo sua localização...', 'info');
+    locationButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Buscando...';
+    locationButton.disabled = true;
+
+    if (!navigator.geolocation) {
+      mostrarStatus('Geolocalização não suportada pelo navegador', 'error');
+      locationButton.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i>Minha Localização';
+      locationButton.disabled = false;
+      return;
+    }
+
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          resolve, 
+          reject, 
+          {
+            enableHighAccuracy: false,
+            timeout: 10000,
+            maximumAge: 60000
+          }
+        );
+      });
+
+      ultimaLocalizacao = {
+        lat: position.coords.latitude,
+        lon: position.coords.longitude
       };
       
-      statusBox.className = `text-center p-4 mb-4 rounded-lg ${cores[tipo]} dark:text-white`;
-      statusBox.innerHTML = `<i class="fas ${icones[tipo]} mr-2"></i>${mensagem}`;
+      const localizacao = await obterNomeCidade(position.coords.latitude, position.coords.longitude);
+      cityInput.value = localizacao;
+      
+      await buscarDadosMeteorologicos(position.coords.latitude, position.coords.longitude, localizacao);
+    } catch (error) {
+      console.error('Erro na geolocalização:', error);
+      mostrarStatus('Não foi possível obter sua localização. Verifique as permissões do navegador.', 'error');
+    } finally {
+      locationButton.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i>Minha Localização';
+      locationButton.disabled = false;
     }
+  }, 500);
 
-    function debounce(func, wait) {
-      let timeout;
-      return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
-    }
+  locationButton.addEventListener('click', solicitarLocalizacaoDebounced);
 
-    async function obterNomeCidade(lat, lon) {
-      const cacheKey = `cidade_${lat.toFixed(4)}_${lon.toFixed(4)}`;
-      const cachedCidade = localStorage.getItem(cacheKey);
-      if (cachedCidade) return cachedCidade;
+  function calcularPontoOrvalho(temp, umidade) {
+    if (!temp || !umidade || umidade < 0 || umidade > 100) return null;
+    const a = 17.27;
+    const b = 237.7;
+    const alpha = ((a * temp) / (b + temp)) + Math.log(umidade / 100);
+    const pontoOrvalho = (b * alpha) / (a - alpha);
+    return pontoOrvalho.toFixed(1);
+  }
 
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=pt-BR`);
-        const data = await response.json();
-        const cidade = data.address.city || data.address.town || data.address.municipality || data.address.county || "Local Desconhecido";
-        const bairro = data.address.village || data.address.suburb || data.address.neighbourhood || "";
-        const localizacao = bairro ? `${cidade} - ${bairro}` : cidade;
-        localStorage.setItem(cacheKey, localizacao);
-        return localizacao;
-      } catch (error) {
-        console.error('Erro ao obter nome da cidade:', error);
-        return "Local Desconhecido";
-      }
-    }
-
-    async function buscarPorCidade() {
-      const cidadeInputValue = cityInput.value.trim();
-      if (!cidadeInputValue) {
-        mostrarStatus('Digite uma cidade para buscar', 'warning');
-        return;
+  async function buscarDadosMeteorologicos(lat, lon, localizacao) {
+    try {
+      const meteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m,windgusts_10m&timezone=auto`);
+      const meteoData = await meteoResponse.json();
+      
+      if (!meteoData.current_weather || !meteoData.hourly || !meteoData.hourly.relativehumidity_2m) {
+        throw new Error('Dados meteorológicos incompletos');
       }
 
-      mostrarStatus(`Buscando dados para ${cidadeInputValue}...`, 'info');
+      localStorage.setItem('ultimosDadosMeteo', JSON.stringify({ meteoData, timestamp: Date.now() }));
 
-      try {
-        const coords = await obterCoordenadasCidadeAPI(cidadeInputValue);
-        if (coords) {
-          const cidadeDetalhada = await obterNomeCidade(coords.lat, coords.lon);
-          cityInput.value = cidadeDetalhada;
-          await buscarDadosMeteorologicos(coords.lat, coords.lon, cidadeDetalhada);
-        } else {
-          mostrarStatus('Cidade não encontrada', 'error');
-        }
-      } catch (error) {
-        console.error('Erro ao buscar cidade:', error);
-        mostrarStatus('Erro ao buscar dados da cidade', 'error');
-      }
-    }
+      let kpIndex = "N/D";
+      fetch(`https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json`)
+        .then(res => res.json())
+        .then(kpData => {
+          if (kpData.length > 1) {
+            kpIndex = parseFloat(kpData[kpData.length - 1][1]).toFixed(1);
+            atualizarKP(kpIndex);
+          }
+        })
+        .catch(kpError => console.error('Erro ao obter índice KP:', kpError));
+      
+      const agora = new Date();
+      const horaAtual = agora.getHours();
 
-    async function obterCoordenadasCidadeAPI(cidade) {
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cidade)}&limit=1&addressdetails=1&accept-language=pt-BR`);
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
+      const pontoOrvalho = calcularPontoOrvalho(meteoData.current_weather.temperature, meteoData.hourly.relativehumidity_2m[horaAtual]);
+      const deltaT = pontoOrvalho !== null ? (meteoData.current_weather.temperature - pontoOrvalho).toFixed(1) : "N/D";
+      
+      console.log('Temperatura:', meteoData.current_weather.temperature);
+      console.log('Umidade Relativa:', meteoData.hourly.relativehumidity_2m[horaAtual]);
+      console.log('Ponto de Orvalho:', pontoOrvalho);
+      console.log('Delta T:', deltaT);
+
+      const times = meteoData.hourly.time.map(t => new Date(t).getTime());
+      const nowMs = Date.now();
+
+      let startIdx = times.findIndex(ms => ms > nowMs);
+      if (startIdx === -1) startIdx = times.length;
+      startIdx = Math.max(0, startIdx - 1);
+
+      const previsao = meteoData.hourly.time
+        .slice(startIdx, startIdx + QTD_PREVISOES)
+        .map((time, i) => {
+          const idx = startIdx + i;
+          const d = new Date(time);
+          const pontoOrvalhoPrev = calcularPontoOrvalho(meteoData.hourly.temperature_2m[idx], meteoData.hourly.relativehumidity_2m[idx]);
+          const deltaTPrev = pontoOrvalhoPrev !== null ? (meteoData.hourly.temperature_2m[idx] - pontoOrvalhoPrev).toFixed(1) : "N/D";
           return {
-            lat: parseFloat(data[0].lat),
-            lon: parseFloat(data[0].lon)
+            hora: d.getHours(),
+            temp: meteoData.hourly.temperature_2m[idx],
+            vento: meteoData.hourly.windspeed_10m[idx],
+            chuva: meteoData.hourly.precipitation[idx],
+            umidade: meteoData.hourly.relativehumidity_2m[idx],
+            pontoOrvalho: pontoOrvalhoPrev,
+            deltaT: deltaTPrev,
+            iconeClima: obterIconeDoWeatherCode(meteoData.hourly.weathercode[idx]),
+            condicao: interpretarWeatherCode(meteoData.hourly.weathercode[idx]),
+            isAgora: i === 0
           };
-        }
-        return null;
-      } catch (error) {
-        console.error('Erro na geocodificação:', error);
-        return null;
-      }
-    }
-
-    const solicitarLocalizacaoDebounced = debounce(async function() {
-      mostrarStatus('Obtendo sua localização...', 'info');
-      locationButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Buscando...';
-      locationButton.disabled = true;
-
-      if (!navigator.geolocation) {
-        mostrarStatus('Geolocalização não suportada pelo navegador', 'error');
-        locationButton.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i>Minha Localização';
-        locationButton.disabled = false;
-        return;
-      }
-
-      try {
-        const position = await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve, 
-            reject, 
-            {
-              enableHighAccuracy: false,
-              timeout: 10000,
-              maximumAge: 60000
-            }
-          );
         });
 
-        ultimaLocalizacao = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude
-        };
-        
-        const localizacao = await obterNomeCidade(position.coords.latitude, position.coords.longitude);
-        cityInput.value = localizacao;
-        
-        await buscarDadosMeteorologicos(position.coords.latitude, position.coords.longitude, localizacao);
-      } catch (error) {
-        console.error('Erro na geolocalização:', error);
-        mostrarStatus('Não foi possível obter sua localização. Verifique as permissões do navegador.', 'error');
-      } finally {
-        locationButton.innerHTML = '<i class="fas fa-map-marker-alt mr-2"></i>Minha Localização';
-        locationButton.disabled = false;
-      }
-    }, 500);
+      const dados = {
+        atual: {
+          condicao: interpretarWeatherCode(meteoData.current_weather.weathercode),
+          iconeClima: obterIconeDoWeatherCode(meteoData.current_weather.weathercode),
+          temp: meteoData.current_weather.temperature,
+          umidade: meteoData.hourly.relativehumidity_2m[horaAtual],
+          vento: meteoData.current_weather.windspeed,
+          rajada: Math.round(meteoData.hourly.windgusts_10m[horaAtual]),
+          direcaoVento: direcaoVento(meteoData.current_weather.winddirection),
+          chuva: meteoData.hourly.precipitation[horaAtual],
+          visibilidade: (meteoData.hourly.visibility?.[horaAtual] / 1000 || 10).toFixed(1),
+          pontoOrvalho: pontoOrvalho || "N/D",
+          deltaT: deltaT,
+          kpIndex: kpIndex,
+          atualizado: agora.toLocaleTimeString(),
+          localizacao: localizacao
+        },
+        previsao
+      };
+      
+      exibirDados(dados.atual, dados.previsao);
+      ultimaBusca = { lat, lon, cidade: localizacao };
+      usandoGPS = !!localizacao;
+    } catch (error) {
+      console.error('Erro na API meteorológica:', error);
+      const cachedData = localStorage.getItem('ultimosDadosMeteo');
+      if (cachedData) {
+        const { meteoData, timestamp } = JSON.parse(cachedData);
+        if (Date.now() - timestamp < 3600000) {
+          console.log('Usando dados em cache');
+          mostrarStatus('Usando dados em cache devido a erro na API', 'warning');
+          const agora = new Date();
+          const horaAtual = agora.getHours();
+          const pontoOrvalho = calcularPontoOrvalho(meteoData.current_weather.temperature, meteoData.hourly.relativehumidity_2m[horaAtual]);
+          const deltaT = pontoOrvalho !== null ? (meteoData.current_weather.temperature - pontoOrvalho).toFixed(1) : "N/D";
+          
+          const times = meteoData.hourly.time.map(t => new Date(t).getTime());
+          const nowMs = Date.now();
+          let startIdx = times.findIndex(ms => ms > nowMs);
+          if (startIdx === -1) startIdx = times.length;
+          startIdx = Math.max(0, startIdx - 1);
 
-    locationButton.addEventListener('click', solicitarLocalizacaoDebounced);
+          const previsao = meteoData.hourly.time
+            .slice(startIdx, startIdx + QTD_PREVISOES)
+            .map((time, i) => {
+              const idx = startIdx + i;
+              const d = new Date(time);
+              const pontoOrvalhoPrev = calcularPontoOrvalho(meteoData.hourly.temperature_2m[idx], meteoData.hourly.relativehumidity_2m[idx]);
+              const deltaTPrev = pontoOrvalhoPrev !== null ? (meteoData.hourly.temperature_2m[idx] - pontoOrvalhoPrev).toFixed(1) : "N/D";
+              return {
+                hora: d.getHours(),
+                temp: meteoData.hourly.temperature_2m[idx],
+                vento: meteoData.hourly.windspeed_10m[idx],
+                chuva: meteoData.hourly.precipitation[idx],
+                umidade: meteoData.hourly.relativehumidity_2m[idx],
+                pontoOrvalho: pontoOrvalhoPrev,
+                deltaT: deltaTPrev,
+                iconeClima: obterIconeDoWeatherCode(meteoData.hourly.weathercode[idx]),
+                condicao: interpretarWeatherCode(meteoData.hourly.weathercode[idx]),
+                isAgora: i === 0
+              };
+            });
 
-    function calcularPontoOrvalho(temp, umidade) {
-      if (!temp || !umidade || umidade < 0 || umidade > 100) return null;
-      const a = 17.27;
-      const b = 237.7;
-      const alpha = ((a * temp) / (b + temp)) + Math.log(umidade / 100);
-      const pontoOrvalho = (b * alpha) / (a - alpha);
-      return pontoOrvalho.toFixed(1);
-    }
-
-    async function buscarDadosMeteorologicos(lat, lon, localizacao) {
-      try {
-        const meteoResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=temperature_2m,relativehumidity_2m,precipitation,weathercode,windspeed_10m,windgusts_10m&timezone=auto`);
-        const meteoData = await meteoResponse.json();
-        
-        if (!meteoData.current_weather || !meteoData.hourly || !meteoData.hourly.relativehumidity_2m) {
-          throw new Error('Dados meteorológicos incompletos');
-        }
-
-        localStorage.setItem('ultimosDadosMeteo', JSON.stringify({ meteoData, timestamp: Date.now() }));
-
-        let kpIndex = "N/D";
-        fetch(`https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json`)
-          .then(res => res.json())
-          .then(kpData => {
-            if (kpData.length > 1) {
-              kpIndex = parseFloat(kpData[kpData.length - 1][1]).toFixed(1);
-              atualizarKP(kpIndex);
-            }
-          })
-          .catch(kpError => console.error('Erro ao obter índice KP:', kpError));
-        
-        const agora = new Date();
-        const horaAtual = agora.getHours();
-
-        const pontoOrvalho = calcularPontoOrvalho(meteoData.current_weather.temperature, meteoData.hourly.relativehumidity_2m[horaAtual]);
-        const deltaT = pontoOrvalho !== null ? (meteoData.current_weather.temperature - pontoOrvalho).toFixed(1) : "N/D";
-        
-        console.log('Temperatura:', meteoData.current_weather.temperature);
-        console.log('Umidade Relativa:', meteoData.hourly.relativehumidity_2m[horaAtual]);
-        console.log('Ponto de Orvalho:', pontoOrvalho);
-        console.log('Delta T:', deltaT);
-
-        const times = meteoData.hourly.time.map(t => new Date(t).getTime());
-        const nowMs = Date.now();
-
-        let startIdx = times.findIndex(ms => ms > nowMs);
-        if (startIdx === -1) startIdx = times.length;
-        startIdx = Math.max(0, startIdx - 1);
-
-        const previsao = meteoData.hourly.time
-          .slice(startIdx, startIdx + QTD_PREVISOES)
-          .map((time, i) => {
-            const idx = startIdx + i;
-            const d = new Date(time);
-            const pontoOrvalhoPrev = calcularPontoOrvalho(meteoData.hourly.temperature_2m[idx], meteoData.hourly.relativehumidity_2m[idx]);
-            const deltaTPrev = pontoOrvalhoPrev !== null ? (meteoData.hourly.temperature_2m[idx] - pontoOrvalhoPrev).toFixed(1) : "N/D";
-            return {
-              hora: d.getHours(),
-              temp: meteoData.hourly.temperature_2m[idx],
-              vento: meteoData.hourly.windspeed_10m[idx],
-              chuva: meteoData.hourly.precipitation[idx],
-              umidade: meteoData.hourly.relativehumidity_2m[idx],
-              pontoOrvalho: pontoOrvalhoPrev,
-              deltaT: deltaTPrev,
-              iconeClima: obterIconeDoWeatherCode(meteoData.hourly.weathercode[idx]),
-              condicao: interpretarWeatherCode(meteoData.hourly.weathercode[idx]),
-              isAgora: i === 0
-            };
-          });
-
-        const dados = {
-          atual: {
-            condicao: interpretarWeatherCode(meteoData.current_weather.weathercode),
-            iconeClima: obterIconeDoWeatherCode(meteoData.current_weather.weathercode),
-            temp: meteoData.current_weather.temperature,
-            umidade: meteoData.hourly.relativehumidity_2m[horaAtual],
-            vento: meteoData.current_weather.windspeed,
-            rajada: Math.round(meteoData.hourly.windgusts_10m[horaAtual]),
-            direcaoVento: direcaoVento(meteoData.current_weather.winddirection),
-            chuva: meteoData.hourly.precipitation[horaAtual],
-            visibilidade: (meteoData.hourly.visibility?.[horaAtual] / 1000 || 10).toFixed(1),
-            pontoOrvalho: pontoOrvalho || "N/D",
-            deltaT: deltaT,
-            kpIndex: kpIndex,
-            atualizado: agora.toLocaleTimeString(),
-            localizacao: localizacao
-          },
-          previsao
-        };
-        
-        exibirDados(dados.atual, dados.previsao);
-        ultimaBusca = { lat, lon, cidade: localizacao };
-        usandoGPS = !!localizacao;
-      } catch (error) {
-        console.error('Erro na API meteorológica:', error);
-        const cachedData = localStorage.getItem('ultimosDadosMeteo');
-        if (cachedData) {
-          const { meteoData, timestamp } = JSON.parse(cachedData);
-          if (Date.now() - timestamp < 3600000) {
-            console.log('Usando dados em cache');
-            mostrarStatus('Usando dados em cache devido a erro na API', 'warning');
-            const agora = new Date();
-            const horaAtual = agora.getHours();
-            const pontoOrvalho = calcularPontoOrvalho(meteoData.current_weather.temperature, meteoData.hourly.relativehumidity_2m[horaAtual]);
-            const deltaT = pontoOrvalho !== null ? (meteoData.current_weather.temperature - pontoOrvalho).toFixed(1) : "N/D";
-            
-            const times = meteoData.hourly.time.map(t => new Date(t).getTime());
-            const nowMs = Date.now();
-            let startIdx = times.findIndex(ms => ms > nowMs);
-            if (startIdx === -1) startIdx = times.length;
-            startIdx = Math.max(0, startIdx - 1);
-
-            const previsao = meteoData.hourly.time
-              .slice(startIdx, startIdx + QTD_PREVISOES)
-              .map((time, i) => {
-                const idx = startIdx + i;
-                const d = new Date(time);
-                const pontoOrvalhoPrev = calcularPontoOrvalho(meteoData.hourly.temperature_2m[idx], meteoData.hourly.relativehumidity_2m[idx]);
-                const deltaTPrev = pontoOrvalhoPrev !== null ? (meteoData.hourly.temperature_2m[idx] - pontoOrvalhoPrev).toFixed(1) : "N/D";
-                return {
-                  hora: d.getHours(),
-                  temp: meteoData.hourly.temperature_2m[idx],
-                  vento: meteoData.hourly.windspeed_10m[idx],
-                  chuva: meteoData.hourly.precipitation[idx],
-                  umidade: meteoData.hourly.relativehumidity_2m[idx],
-                  pontoOrvalho: pontoOrvalhoPrev,
-                  deltaT: deltaTPrev,
-                  iconeClima: obterIconeDoWeatherCode(meteoData.hourly.weathercode[idx]),
-                  condicao: interpretarWeatherCode(meteoData.hourly.weathercode[idx]),
-                  isAgora: i === 0
-                };
-              });
-
-            const dados = {
-              atual: {
-                condicao: interpretarWeatherCode(meteoData.current_weather.weathercode),
-                iconeClima: obterIconeDoWeatherCode(meteoData.current_weather.weathercode),
-                temp: meteoData.current_weather.temperature,
-                umidade: meteoData.hourly.relativehumidity_2m[horaAtual],
-                vento: meteoData.current_weather.windspeed,
-                rajada: Math.round(meteoData.hourly.windgusts_10m[horaAtual]),
-                direcaoVento: direcaoVento(meteoData.current_weather.winddirection),
-                chuva: meteoData.hourly.precipitation[horaAtual],
-                visibilidade: (meteoData.hourly.visibility?.[horaAtual] / 1000 || 10).toFixed(1),
-                pontoOrvalho: pontoOrvalho || "N/D",
-                deltaT: deltaT,
-                kpIndex: "N/D",
-                atualizado: agora.toLocaleTimeString(),
-                localizacao: localizacao
-              },
-              previsao
-            };
-            
-            exibirDados(dados.atual, dados.previsao);
-            ultimaBusca = { lat, lon, cidade: localizacao };
-            usandoGPS = !!localizacao;
-          } else {
-            mostrarStatus('Erro ao buscar dados meteorológicos', 'error');
-          }
+          const dados = {
+            atual: {
+              condicao: interpretarWeatherCode(meteoData.current_weather.weathercode),
+              iconeClima: obterIconeDoWeatherCode(meteoData.current_weather.weathercode),
+              temp: meteoData.current_weather.temperature,
+              umidade: meteoData.hourly.relativehumidity_2m[horaAtual],
+              vento: meteoData.current_weather.windspeed,
+              rajada: Math.round(meteoData.hourly.windgusts_10m[horaAtual]),
+              direcaoVento: direcaoVento(meteoData.current_weather.winddirection),
+              chuva: meteoData.hourly.precipitation[horaAtual],
+              visibilidade: (meteoData.hourly.visibility?.[horaAtual] / 1000 || 10).toFixed(1),
+              pontoOrvalho: pontoOrvalho || "N/D",
+              deltaT: deltaT,
+              kpIndex: "N/D",
+              atualizado: agora.toLocaleTimeString(),
+              localizacao: localizacao
+            },
+            previsao
+          };
+          
+          exibirDados(dados.atual, dados.previsao);
+          ultimaBusca = { lat, lon, cidade: localizacao };
+          usandoGPS = !!localizacao;
         } else {
           mostrarStatus('Erro ao buscar dados meteorológicos', 'error');
         }
+      } else {
+        mostrarStatus('Erro ao buscar dados meteorológicos', 'error');
       }
     }
+  }
 
-    function atualizarKP(kpIndex) {
-      const kpCard = grid.querySelector(':scope > div:nth-child(10)');
-      if (kpCard) {
-        const kpOk = kpIndex <= 4;
-        kpCard.querySelector('div:nth-child(3)').textContent = kpIndex;
-        kpCard.querySelector('div:nth-child(4)').textContent = kpOk ? "Normal" : "Tempestade geomagnética";
-        kpCard.className = `p-4 rounded-lg flex flex-col items-center text-center dark:text-white ${kpOk ? "bg-green-300 dark:bg-green-700" : "bg-red-300 dark:bg-red-700"}`;
+  function atualizarKP(kpIndex) {
+    const kpCard = grid.querySelector(':scope > div:nth-child(10)');
+    if (kpCard) {
+      const kpOk = kpIndex <= 4;
+      kpCard.querySelector('div:nth-child(3)').textContent = kpIndex;
+      kpCard.querySelector('div:nth-child(4)').textContent = kpOk ? "Normal" : "Tempestade geomagnética";
+      kpCard.className = `p-4 rounded-lg flex flex-col items-center text-center dark:text-white ${kpOk ? "bg-green-300 dark:bg-green-700" : "bg-red-300 dark:bg-red-700"}`;
+    }
+  }
+
+  function interpretarWeatherCode(code) {
+    const codes = {
+      0: "Céu limpo",
+      1: "Poucas nuvens",
+      2: "Parcialmente nublado",
+      3: "Nublado",
+      45: "Nevoeiro",
+      48: "Nevoeiro com geada",
+      51: "Chuvisco leve",
+      53: "Chuvisco moderado",
+      55: "Chuvisco denso",
+      56: "Chuvisco congelante leve",
+      57: "Chuvisco congelante denso",
+      61: "Chuva leve",
+      63: "Chuva moderada",
+      65: "Chuva forte",
+      66: "Chuva congelante leve",
+      67: "Chuva congelante forte",
+      71: "Queda de neve leve",
+      73: "Queda de neve moderada",
+      75: "Queda de neve forte",
+      77: "Grãos de neve",
+      80: "Pancadas de chuva leves",
+      81: "Pancadas de chuva moderadas",
+      82: "Pancadas de chuva violentas",
+      85: "Pancadas de neve leves",
+      86: "Pancadas de neve pesadas",
+      95: "Trovoada",
+      96: "Trovoada com chuva leve",
+      99: "Trovoada com chuva forte"
+    };
+    return codes[code] || `Código ${code}`;
+  }
+
+  function obterIconeDoWeatherCode(code) {
+    if (code === 0) return 'fa-sun';
+    if (code >= 1 && code <= 3) return 'fa-cloud-sun';
+    if (code >= 45 && code <= 57) return 'fa-cloud-rain';
+    if (code >= 61 && code <= 67) return 'fa-cloud-showers-heavy';
+    if (code >= 71 && code <= 77) return 'fa-snowflake';
+    if (code >= 80 && code <= 86) return 'fa-cloud-rain';
+    if (code >= 95 && code <= 99) return 'fa-bolt';
+    return 'fa-cloud';
+  }
+
+  function direcaoVento(graus) {
+    const direcoes = ['Norte', 'Nordeste', 'Leste', 'Sudeste', 'Sul', 'Sudoeste', 'Oeste', 'Noroeste'];
+    return direcoes[Math.round(graus / 45) % 8];
+  }
+
+  function exibirDados(dadosAtuais, previsao) {
+    grid.innerHTML = "";
+    forecastGrid.innerHTML = "";
+
+    const dadosAtuaisOriginais = {...dadosAtuais};
+    let dadosExibidosAtualmente = {...dadosAtuais};
+
+    const atualizarDadosPrincipais = (dados) => {
+      dadosExibidosAtualmente = {...dados};
+      const pontoOrvalho = dados.pontoOrvalho !== "N/D" ? dados.pontoOrvalho : (calcularPontoOrvalho(dados.temp, dados.umidade) || "N/D");
+      const deltaT = dados.deltaT !== "N/D" ? dados.deltaT : (dados.temp - pontoOrvalho).toFixed(1) || "N/D";
+      
+      const kpStatus = dados.kpIndex === "N/D" ? null : parseFloat(dados.kpIndex);
+      const kpOk = kpStatus === null ? true : kpStatus <= 4;
+
+      const condicoes = {
+        vento: dados.vento <= 15,
+        rajada: dados.rajada <= 25,
+        chuva: dados.chuva <= 0.2,
+        visibilidade: dados.visibilidade >= 5,
+        deltaT: deltaT !== "N/D" && deltaT >= 2 && deltaT <= 10,
+        umidade: dados.umidade >= 40 && dados.umidade <= 70,
+        kp: kpOk
+};
+
+      const okCount = Object.values(condicoes).filter(Boolean).length;
+      const totalCondicoes = Object.keys(condicoes).length;
+
+      let statusVoo, statusCor, statusIcone;
+      if (okCount === totalCondicoes) {
+        statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!";
+        statusCor = "bg-green-400 dark:bg-green-600";
+        statusIcone = "fa-check-circle";
+      } else if (okCount >= Math.floor(totalCondicoes * 0.7)) {
+        statusVoo = "🟡 FAVORÁVEL - Avalie com cautela";
+        statusCor = "bg-yellow-400 dark:bg-yellow-600";
+        statusIcone = "fa-exclamation-circle";
+      } else if (okCount >= Math.floor(totalCondicoes * 0.4)) {
+        statusVoo = "🟠 NÃO FAVORÁVEL - Ajuste parâmetros";
+        statusCor = "bg-orange-400 dark:bg-orange-600";
+        statusIcone = "fa-exclamation-triangle";
+      } else {
+        statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis";
+        statusCor = "bg-red-400 dark:bg-red-600";
+        statusIcone = "fa-times-circle";
       }
-    }
 
-    function interpretarWeatherCode(code) {
-      const codes = {
-        0: "Céu limpo",
-        1: "Poucas nuvens",
-        2: "Parcialmente nublado",
-        3: "Nublado",
-        45: "Nevoeiro",
-        48: "Nevoeiro com geada",
-        51: "Chuvisco leve",
-        53: "Chuvisco moderado",
-        55: "Chuvisco denso",
-        56: "Chuvisco congelante leve",
-        57: "Chuvisco congelante denso",
-        61: "Chuva leve",
-        63: "Chuva moderada",
-        65: "Chuva forte",
-        66: "Chuva congelante leve",
-        67: "Chuva congelante forte",
-        71: "Queda de neve leve",
-        73: "Queda de neve moderada",
-        75: "Queda de neve forte",
-        77: "Grãos de neve",
-        80: "Pancadas de chuva leves",
-        81: "Pancadas de chuva moderadas",
-        82: "Pancadas de chuva violentas",
-        85: "Pancadas de neve leves",
-        86: "Pancadas de neve pesadas",
-        95: "Trovoada",
-        96: "Trovoada com chuva leve",
-        99: "Trovoada com chuva forte"
-      };
-      return codes[code] || `Código ${code}`;
-    }
-
-    function obterIconeDoWeatherCode(code) {
-      if (code === 0) return 'fa-sun';
-      if (code >= 1 && code <= 3) return 'fa-cloud-sun';
-      if (code >= 45 && code <= 57) return 'fa-cloud-rain';
-      if (code >= 61 && code <= 67) return 'fa-cloud-showers-heavy';
-      if (code >= 71 && code <= 77) return 'fa-snowflake';
-      if (code >= 80 && code <= 86) return 'fa-cloud-rain';
-      if (code >= 95 && code <= 99) return 'fa-bolt';
-      return 'fa-cloud';
-    }
-
-    function direcaoVento(graus) {
-      const direcoes = ['Norte', 'Nordeste', 'Leste', 'Sudeste', 'Sul', 'Sudoeste', 'Oeste', 'Noroeste'];
-      return direcoes[Math.round(graus / 45) % 8];
-    }
-
-    function exibirDados(dadosAtuais, previsao) {
       grid.innerHTML = "";
-      forecastGrid.innerHTML = "";
+      const blocosAtuais = [
+        { nome: "Condição", valor: dados.condicao, icone: dados.iconeClima, cor: "bg-blue-100 dark:bg-blue-900" },
+        { nome: "Temperatura", valor: `${dados.temp}°C`, icone: "fa-temperature-high", cor: corStatus(dados.temp, 10, 30, true) },
+        { nome: "Umidade", valor: `${dados.umidade}%`, icone: "fa-tint", cor: corStatus(dados.umidade, 30, 70) },
+        { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
+        { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: deltaT !== "N/D" ? corStatus(deltaT, 2, 10) : "bg-gray-200 dark:bg-gray-700" },
+        { nome: "Vento", valor: `${dados.vento} km/h ${dados.direcaoVento}`, icone: "fa-wind", cor: corStatus(dados.vento, 15, 25) },
+        { nome: "Rajadas", valor: `${Math.round(dados.rajada)} km/h`, icone: "fa-wind", cor: corStatus(dados.rajada, 25, 35) },
+        { nome: "Chuva", valor: `${dados.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dados.chuva, 0.5, 2) },
+        { nome: "Visibilidade", valor: `${dados.visibilidade} km`, icone: "fa-eye", cor: corStatus(dados.visibilidade, 5, 3, true) },
+        { nome: "Índice KP", valor: dados.kpIndex, icone: "fa-magnet", cor: kpStatus === null ? "bg-gray-200 dark:bg-gray-700" : (kpOk ? "bg-green-300 dark:bg-green-700" : "bg-red-300 dark:bg-red-700") },
+        { nome: "Atualizado", valor: dados.atualizado, icone: "fa-clock", cor: "bg-gray-200 dark:bg-gray-700" }
+      ];
 
-      const dadosAtuaisOriginais = {...dadosAtuais};
-      let dadosExibidosAtualmente = {...dadosAtuais};
-
-      const atualizarDadosPrincipais = (dados) => {
-        dadosExibidosAtualmente = {...dados};
-        const pontoOrvalho = dados.pontoOrvalho !== "N/D" ? dados.pontoOrvalho : (calcularPontoOrvalho(dados.temp, dados.umidade) || "N/D");
-        const deltaT = dados.deltaT !== "N/D" ? dados.deltaT : (dados.temp - pontoOrvalho).toFixed(1) || "N/D";
-        
-        const kpStatus = dados.kpIndex === "N/D" ? null : parseFloat(dados.kpIndex);
-        const kpOk = kpStatus === null ? true : kpStatus <= 4;
-
-        const condicoes = {
-          vento: dados.vento <= 15,
-          rajada: dados.rajada <= 25,
-          chuva: dados.chuva <= 0.2,
-          visibilidade: dados.visibilidade >= 5,
-          deltaT: deltaT !== "N/D" && deltaT >= 2 && deltaT <= 10,
-          umidade: dados.umidade >= 40 && dados.umidade <= 70,
-          kp: kpOk
-        };
-
-        const okCount = Object.values(condicoes).filter(Boolean).length;
-        const totalCondicoes = Object.keys(condicoes).length;
-
-        let statusVoo, statusCor, statusIcone;
-        if (okCount === totalCondicoes) {
-          statusVoo = "✅ BOM PARA VOAR - Condições ideais para pulverização!";
-          statusCor = "bg-green-400 dark:bg-green-600";
-          statusIcone = "fa-check-circle";
-        } else if (okCount >= Math.floor(totalCondicoes * 0.7)) {
-          statusVoo = "🟡 FAVORÁVEL - Avalie com cautela";
-          statusCor = "bg-yellow-400 dark:bg-yellow-600";
-          statusIcone = "fa-exclamation-circle";
-        } else if (okCount >= Math.floor(totalCondicoes * 0.4)) {
-          statusVoo = "🟠 NÃO FAVORÁVEL - Ajuste parâmetros";
-          statusCor = "bg-orange-400 dark:bg-orange-600";
-          statusIcone = "fa-exclamation-triangle";
-        } else {
-          statusVoo = "❌ RUIM PARA VOAR - Condições desfavoráveis";
-          statusCor = "bg-red-400 dark:bg-red-600";
-          statusIcone = "fa-times-circle";
-        }
-
-        grid.innerHTML = "";
-        const blocosAtuais = [
-          { nome: "Condição", valor: dados.condicao, icone: dados.iconeClima, cor: "bg-blue-100 dark:bg-blue-900" },
-          { nome: "Temperatura", valor: `${dados.temp}°C`, icone: "fa-temperature-high", cor: corStatus(dados.temp, 10, 30, true) },
-          { nome: "Umidade", valor: `${dados.umidade}%`, icone: "fa-tint", cor: corStatus(dados.umidade, 30, 70) },
-          { nome: "Ponto de Orvalho", valor: `${pontoOrvalho}°C`, icone: "fa-tint", cor: corStatus(pontoOrvalho, 10, 15) },
-          { nome: "Delta T", valor: `${deltaT}°C`, icone: "fa-thermometer-half", cor: deltaT !== "N/D" ? corStatus(deltaT, 2, 10) : "bg-gray-200 dark:bg-gray-700" },
-          { nome: "Vento", valor: `${dados.vento} km/h ${dados.direcaoVento}`, icone: "fa-wind", cor: corStatus(dados.vento, 15, 25) },
-          { nome: "Rajadas", valor: `${Math.round(dados.rajada)} km/h`, icone: "fa-wind", cor: corStatus(dados.rajada, 25, 35) },
-          { nome: "Chuva", valor: `${dados.chuva}mm`, icone: "fa-cloud-rain", cor: corStatus(dados.chuva, 0.5, 2) },
-          { nome: "Visibilidade", valor: `${dados.visibilidade} km`, icone: "fa-eye", cor: corStatus(dados.visibilidade, 5, 3, true) },
-          { nome: "Índice KP", valor: dados.kpIndex, icone: "fa-magnet", cor: kpStatus === null ? "bg-gray-200 dark:bg-gray-700" : (kpOk ? "bg-green-300 dark:bg-green-700" : "bg-red-300 dark:bg-red-700") },
-          { nome: "Atualizado", valor: dados.atualizado, icone: "fa-clock", cor: "bg-gray-200 dark:bg-gray-700" }
-        ];
-
-        blocosAtuais.forEach(b => {
-          const div = document.createElement("div");
-          div.className = `${b.cor} p-4 rounded-lg flex flex-col items-center text-center dark:text-white`;
-          div.innerHTML = `
-            <div class="font-bold mb-1">${b.nome}</div>
-            <i class="fas ${b.icone} text-xl mb-1"></i>
-            <div>${b.valor}</div>
-            ${b.nome === "Índice KP" && dados.kpIndex !== "N/D" ? `<div class="text-xs mt-1">${kpOk ? "Normal" : "Tempestade geomagnética"}</div>` : ''}
-          `;
-          grid.appendChild(div);
-        });
-
-        let statusKP = '';
-        if (dados.kpIndex !== "N/D") {
-          statusKP = kpOk ? '' : '<br><strong>Atenção:</strong> Tempestade geomagnética (KP > 4) pode afetar o GPS';
-        }
-        
-        statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
-        statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}${statusKP}`;
-      };
-
-      atualizarDadosPrincipais(dadosAtuaisOriginais);
-
-      previsao.forEach((p, idx) => {
-        const textoHora = idx === 0 ? "Agora" : `${p.hora}h`;
-        
-        const condicoesHora = {
-          vento: p.vento <= 15,
-          chuva: p.chuva <= 0.2,
-          umidade: p.umidade >= 40 && p.umidade <= 70,
-          deltaT: p.deltaT !== "N/D" && p.deltaT >= 2 && p.deltaT <= 10
-        };
-        
-        const okCountHora = Object.values(condicoesHora).filter(Boolean).length;
-        let statusCorHora = '';
-        
-        if (okCountHora === 4) statusCorHora = 'bg-green-100 dark:bg-green-900';
-        else if (okCountHora >= 2) statusCorHora = 'bg-yellow-100 dark:bg-yellow-900';
-        else statusCorHora = 'bg-red-100 dark:bg-red-900';
-
-        const card = document.createElement("div");
-        card.className = `forecast-card ${statusCorHora} p-3 rounded-lg shadow text-center dark:text-white flex flex-col items-center`;
-        card.innerHTML = `
-          <div class="font-bold mb-1">${textoHora}</div>
-          <i class="fas ${p.iconeClima} text-xl my-1"></i>
-          <div class="my-1">${p.temp}°C</div>
-          <div class="text-xs">Vento: ${p.vento} km/h</div>
-          <div class="text-xs">Chuva: ${p.chuva}mm</div>
+      blocosAtuais.forEach(b => {
+        const div = document.createElement("div");
+        div.className = `${b.cor} p-4 rounded-lg flex flex-col items-center text-center dark:text-white`;
+        div.innerHTML = `
+          <div class="font-bold mb-1">${b.nome}</div>
+          <i class="fas ${b.icone} text-xl mb-1"></i>
+          <div>${b.valor}</div>
+          ${b.nome === "Índice KP" && dados.kpIndex !== "N/D" ? `<div class="text-xs mt-1">${kpOk ? "Normal" : "Tempestade geomagnética"}</div>` : ''}
         `;
-
-        card.addEventListener('click', () => {
-          if (idx === 0) {
-            atualizarDadosPrincipais(dadosAtuaisOriginais);
-          } else {
-            const dadosHora = {
-              ...p,
-              rajada: Math.round(p.vento * 1.5),
-              visibilidade: 10,
-              direcaoVento: "Variável",
-              atualizado: new Date().toLocaleTimeString(),
-              localizacao: dadosAtuaisOriginais.localizacao,
-              iconeClima: p.iconeClima,
-              condicao: p.condicao,
-              kpIndex: dadosAtuaisOriginais.kpIndex
-            };
-            atualizarDadosPrincipais(dadosHora);
-          }
-        });
-
-        forecastGrid.appendChild(card);
+        grid.appendChild(div);
       });
-    }
 
-    function corStatus(valor, min, max, invertido = false) {
-      let verde = invertido ? valor >= max : valor <= min;
-      let amarelo = invertido ? (valor < max && valor >= min) : (valor > min && valor <= max);
-      if (verde) return "bg-green-300 dark:bg-green-700";
-      if (amarelo) return "bg-yellow-300 dark:bg-yellow-700";
-      return "bg-red-300 dark:bg-red-700";
-    }
+      let statusKP = '';
+      if (dados.kpIndex !== "N/D") {
+        statusKP = kpOk ? '' : '<br><strong>Atenção:</strong> Tempestade geomagnética (KP > 4) pode afetar o GPS';
+      }
+      
+      statusBox.className = `text-center p-4 mb-4 rounded-lg ${statusCor} dark:text-white`;
+      statusBox.innerHTML = `<i class="fas ${statusIcone} mr-2"></i>${statusVoo}${statusKP}`;
+    };
 
-    function coletarDadosAtuaisDoGrid() {
-      const cards = grid.querySelectorAll(':scope > div');
-      if (!cards.length) return null;
+    atualizarDadosPrincipais(dadosAtuaisOriginais);
 
-      const dados = {
-        localizacao: ultimaBusca?.cidade || cityInput.value || "--",
-        condicao: "--",
-        temp: "-- °C",
-        umidade: "-- %",
-        pontoOrvalho: "-- °C",
-        deltaT: "-- °C",
-        vento: "-- km/h",
-        direcaoVento: "",
-        rajada: "-- km/h",
-        chuva: "-- mm",
-        visibilidade: "-- km",
-        atualizado: new Date().toLocaleTimeString()
+    previsao.forEach((p, idx) => {
+      const textoHora = idx === 0 ? "Agora" : `${p.hora}h`;
+      
+      const condicoesHora = {
+        vento: p.vento <= 15,
+        chuva: p.chuva <= 0.2,
+        umidade: p.umidade >= 40 && p.umidade <= 70,
+        deltaT: p.deltaT !== "N/D" && p.deltaT >= 2 && p.deltaT <= 10
       };
+      
+      const okCountHora = Object.values(condicoesHora).filter(Boolean).length;
+      let statusCorHora = '';
+      
+      if (okCountHora === 4) statusCorHora = 'bg-green-100 dark:bg-green-900';
+      else if (okCountHora >= 2) statusCorHora = 'bg-yellow-100 dark:bg-yellow-900';
+      else statusCorHora = 'bg-red-100 dark:bg-red-900';
 
-      cards.forEach(card => {
-        const nomeElement = card.querySelector('.font-bold');
-        if (!nomeElement) return;
-        
-        const nome = nomeElement.textContent.trim();
-        const valorElement = card.querySelector('.font-bold ~ div:not(.fa)');
-        if (!valorElement) return;
-        
-        const valor = valorElement.textContent.trim();
-        
-        switch(nome) {
-          case "Condição":
-            dados.condicao = valor;
-            break;
-          case "Temperatura":
-            dados.temp = valor.includes("°C") ? valor : valor + " °C";
-            break;
-          case "Umidade":
-            dados.umidade = valor.includes("%") ? valor : valor + " %";
-            break;
-          case "Ponto de Orvalho":
-            dados.pontoOrvalho = valor.includes("°C") ? valor : valor + " °C";
-            break;
-          case "Delta T":
-            dados.deltaT = valor.includes("°C") ? valor : valor + " °C";
-            break;
-          case "Vento":
-            dados.vento = valor.includes("km/h") ? valor.split(" km/h")[0] + " km/h" : valor + " km/h";
-            const parts = valor.split(" ");
-            if (parts.length > 2) {
-              dados.direcaoVento = parts.slice(2).join(" ");
-            }
-            break;
-          case "Rajadas":
-            dados.rajada = valor.includes("km/h") ? valor : valor + " km/h";
-            break;
-          case "Chuva":
-            dados.chuva = valor.includes("mm") ? valor : valor + " mm";
-            break;
-          case "Visibilidade":
-            dados.visibilidade = valor.includes("km") ? valor : valor + " km";
-            break;
-          case "Atualizado":
-            dados.atualizado = valor;
-            break;
+      const card = document.createElement("div");
+      card.className = `forecast-card ${statusCorHora} p-3 rounded-lg shadow text-center dark:text-white flex flex-col items-center`;
+      card.innerHTML = `
+        <div class="font-bold mb-1">${textoHora}</div>
+        <i class="fas ${p.iconeClima} text-xl my-1"></i>
+        <div class="my-1">${p.temp}°C</div>
+        <div class="text-xs">Vento: ${p.vento} km/h</div>
+        <div class="text-xs">Chuva: ${p.chuva}mm</div>
+      `;
+
+      card.addEventListener('click', () => {
+        if (idx === 0) {
+          atualizarDadosPrincipais(dadosAtuaisOriginais);
+        } else {
+          const dadosHora = {
+            ...p,
+            rajada: Math.round(p.vento * 1.5),
+            visibilidade: 10,
+            direcaoVento: "Variável",
+            atualizado: new Date().toLocaleTimeString(),
+            localizacao: dadosAtuaisOriginais.localizacao,
+            iconeClima: p.iconeClima,
+            condicao: p.condicao,
+            kpIndex: dadosAtuaisOriginais.kpIndex
+          };
+          atualizarDadosPrincipais(dadosHora);
         }
       });
 
-      return dados;
-    }
+      forecastGrid.appendChild(card);
+    });
+  }
 
-    function validarAplicacao(apl) {
-      let erros = [];
-      apl.products.forEach((p, index) => {
-        if (!p.tipoAplicacao) erros.push(`Produto ${index + 1}: Tipo de Aplicação é obrigatório`);
-        if (!p.produto) erros.push(`Produto ${index + 1}: Produto é obrigatório`);
-        if (p.dosagemProduto && p.dosagemProduto < 0) erros.push(`Produto ${index + 1}: Dosagem do Produto não pode ser negativa`);
-        if (p.dosagemAdjuvante && p.dosagemAdjuvante < 0) erros.push(`Produto ${index + 1}: Dosagem do Adjuvante não pode ser negativa`);
-      });
-      if (apl.quantidadeAgua && apl.quantidadeAgua < 0) erros.push("Quantidade de Água não pode ser negativa");
-      if (apl.areaPulverizada && apl.areaPulverizada < 0) erros.push("Área Pulverizada não pode ser negativa");
-      if (apl.faixa && apl.faixa < 0) erros.push("Faixa não pode ser negativa");
-      if (apl.velocidade && apl.velocidade < 0) erros.push("Velocidade não pode ser negativa");
-      if (apl.altura && apl.altura < 0) erros.push("Altura não pode ser negativa");
-      if (apl.vazao && apl.vazao < 0) erros.push("Vazão não pode ser negativa");
-      return erros;
-    }
+  function corStatus(valor, min, max, invertido = false) {
+    let verde = invertido ? valor >= max : valor <= min;
+    let amarelo = invertido ? (valor < max && valor >= min) : (valor > min && valor <= max);
+    if (verde) return "bg-green-300 dark:bg-green-700";
+    if (amarelo) return "bg-yellow-300 dark:bg-yellow-700";
+    return "bg-red-300 dark:bg-red-700";
+  }
 
-    function gerarRelatorioExcelDeDadosAtuais(dados) {
-      const apl = coletarDadosAplicacao();
-      const erros = validarAplicacao(apl);
-      if (erros.length > 0) {
-        mostrarStatus(`Erro: ${erros.join("; ")}`, "error");
-        return;
+  function coletarDadosAtuaisDoGrid() {
+    const cards = grid.querySelectorAll(':scope > div');
+    if (!cards.length) return null;
+
+    const dados = {
+      localizacao: ultimaBusca?.cidade || cityInput.value || "--",
+      condicao: "--",
+      temp: "-- °C",
+      umidade: "-- %",
+      pontoOrvalho: "-- °C",
+      deltaT: "-- °C",
+      vento: "-- km/h",
+      direcaoVento: "",
+      rajada: "-- km/h",
+      chuva: "-- mm",
+      visibilidade: "-- km",
+      atualizado: new Date().toLocaleTimeString()
+    };
+
+    cards.forEach(card => {
+      const nomeElement = card.querySelector('.font-bold');
+      if (!nomeElement) return;
+      
+      const nome = nomeElement.textContent.trim();
+      const valorElement = card.querySelector('.font-bold ~ div:not(.fa)');
+      if (!valorElement) return;
+      
+      const valor = valorElement.textContent.trim();
+      
+      switch(nome) {
+        case "Condição":
+          dados.condicao = valor;
+          break;
+        case "Temperatura":
+          dados.temp = valor.includes("°C") ? valor : valor + " °C";
+          break;
+        case "Umidade":
+          dados.umidade = valor.includes("%") ? valor : valor + " %";
+          break;
+        case "Ponto de Orvalho":
+          dados.pontoOrvalho = valor.includes("°C") ? valor : valor + " °C";
+          break;
+        case "Delta T":
+          dados.deltaT = valor.includes("°C") ? valor : valor + " °C";
+          break;
+        case "Vento":
+          dados.vento = valor.includes("km/h") ? valor.split(" km/h")[0] + " km/h" : valor + " km/h";
+          const parts = valor.split(" ");
+          if (parts.length > 2) {
+            dados.direcaoVento = parts.slice(2).join(" ");
+          }
+          break;
+        case "Rajadas":
+          dados.rajada = valor.includes("km/h") ? valor : valor + " km/h";
+          break;
+        case "Chuva":
+          dados.chuva = valor.includes("mm") ? valor : valor + " mm";
+          break;
+        case "Visibilidade":
+          dados.visibilidade = valor.includes("km") ? valor : valor + " km";
+          break;
+        case "Atualizado":
+          dados.atualizado = valor;
+          break;
       }
-
-      const incluirAplicacao = temAplicacaoPreenchida(apl);
-
-      const linhas = [
-        ["Relatório Bom para Voar - Informações Meteorológicas"],
-        ["Gerado em:", new Date().toLocaleString()],
-        ["Localização:", dados.localizacao],
-        [],
-        ["DADOS ATUAIS"],
-        ["Condição", dados.condicao],
-        ["Temperatura", dados.temp],
-        ["Umidade", dados.umidade],
-        ["Ponto de Orvalho", dados.pontoOrvalho],
-        ["Delta T", dados.deltaT],
-        ["Vento", dados.vento + (dados.direcaoVento ? " " + dados.direcaoVento : "")],
-        ["Rajadas", dados.rajada],
-        ["Chuva", dados.chuva],
-        ["Visibilidade", dados.visibilidade],
-        ["Atualizado", dados.atualizado]
-      ];
-
-      if (incluirAplicacao) {
-        linhas.push(
-          [],
-          ["RELATÓRIO DA APLICAÇÃO"],
-          ["Piloto", apl.piloto || "-"],
-          ["Modelo do Drone", apl.droneModelo || "-"],
-          ["Local da Pulverização", apl.localPulv || "-"],
-          ["Data/Hora da Aplicação", apl.dataHoraAplicacao || "-"],
-          ["Cultura", apl.cultura || "-"],
-          ["Quantidade de Água (L/ha)", apl.quantidadeAgua || "-"],
-          ["Área Pulverizada (ha)", apl.areaPulverizada || "-"],
-          ["Faixa (m)", apl.faixa || "-"],
-          ["Velocidade (m/s)", apl.velocidade || "-"],
-          ["Altura (m)", apl.altura || "-"],
-          ["Vazão (L/ha)", apl.vazao || "-"],
-          ["Observações", apl.observacoes || "-"]
-        );
-
-        apl.products.forEach((p, index) => {
-          linhas.push(
-            [],
-            [`Produto ${index + 1}`],
-            ["Tipo de Aplicação", p.tipoAplicacao || "-"],
-            ["Produto", p.produto || "-"],
-            ["Dosagem do Produto (mL/ha ou L/ha)", p.dosagemProduto || "-"],
-            ["Adjuvante", p.adjuvante || "-"],
-            ["Dosagem do Adjuvante (mL/ha ou L/ha)", p.dosagemAdjuvante || "-"]
-          );
-        });
-      }
-
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(linhas);
-
-      ws["!cols"] = [{ wch: 28 }, { wch: 40 }];
-      ws["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
-        { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
-      ];
-      if (incluirAplicacao) {
-        const idxTituloApl = linhas.findIndex(r => r[0] === "RELATÓRIO DA APLICAÇÃO");
-        if (idxTituloApl >= 0) ws["!merges"].push({ s: { r: idxTituloApl, c: 0 }, e: { r: idxTituloApl, c: 1 } });
-        apl.products.forEach((_, index) => {
-          const idxProduto = linhas.findIndex(r => r[0] === `Produto ${index + 1}`);
-          if (idxProduto >= 0) ws["!merges"].push({ s: { r: idxProduto, c: 0 }, e: { r: idxProduto, c: 1 } });
-        });
-      }
-
-      XLSX.utils.book_append_sheet(wb, ws, "Dados");
-      XLSX.writeFile(wb, `Relatorio_Bom_para_Voar_${new Date().toISOString().slice(0,10)}.xlsx`);
-    }
-
-    document.getElementById('downloadReport').addEventListener('click', () => {
-      const dados = coletarDadosAtuaisDoGrid();
-      if (!dados) {
-        mostrarStatus("Nenhum dado disponível para exportar", "error");
-        return;
-      }
-      gerarRelatorioExcelDeDadosAtuais(dados);
-      mostrarStatus("Relatório gerado com sucesso!", "success");
     });
 
-    document.getElementById('downloadReportBottom').addEventListener('click', () => {
-      const dados = coletarDadosAtuaisDoGrid();
-      if (!dados) {
-        mostrarStatus("Nenhum dado disponível para exportar", "error");
-        return;
-      }
-      gerarRelatorioExcelDeDadosAtuais(dados);
-      mostrarStatus("Relatório gerado com sucesso!", "success");
-});
+    return dados;
+  }
+
+  function validarAplicacao(apl) {
+    let erros = [];
+    apl.products.forEach((p, index) => {
+      if (!p.tipoAplicacao) erros.push(`Produto ${index + 1}: Tipo de Aplicação é obrigatório`);
+      if (!p.produto) erros.push(`Produto ${index + 1}: Produto é obrigatório`);
+      if (p.dosagemProduto && p.dosagemProduto < 0) erros.push(`Produto ${index + 1}: Dosagem do Produto não pode ser negativa`);
+      if (p.dosagemAdjuvante && p.dosagemAdjuvante < 0) erros.push(`Produto ${index + 1}: Dosagem do Adjuvante não pode ser negativa`);
+    });
+    if (apl.quantidadeAgua && apl.quantidadeAgua < 0) erros.push("Quantidade de Água não pode ser negativa");
+    if (apl.areaPulverizada && apl.areaPulverizada < 0) erros.push("Área Pulverizada não pode ser negativa");
+    if (apl.faixa && apl.faixa < 0) erros.push("Faixa não pode ser negativa");
+    if (apl.velocidade && apl.velocidade < 0) erros.push("Velocidade não pode ser negativa");
+    if (apl.altura && apl.altura < 0) erros.push("Altura não pode ser negativa");
+    if (apl.vazao && apl.vazao < 0) erros.push("Vazão não pode ser negativa");
+    return erros;
+  }
+
+  function gerarRelatorioExcelDeDadosAtuais(dados) {
+    const apl = coletarDadosAplicacao();
+    const erros = validarAplicacao(apl);
+    if (erros.length > 0) {
+      mostrarStatus(`Erro: ${erros.join("; ")}`, "error");
+      return;
+    }
+
+    const incluirAplicacao = temAplicacaoPreenchida(apl);
+
+    const linhas = [
+      ["Relatório Bom para Voar - Informações Meteorológicas"],
+      ["Gerado em:", new Date().toLocaleString()],
+      ["Localização:", dados.localizacao],
+      [],
+      ["DADOS ATUAIS"],
+      ["Condição", dados.condicao],
+      ["Temperatura", dados.temp],
+      ["Umidade", dados.umidade],
+      ["Ponto de Orvalho", dados.pontoOrvalho],
+      ["Delta T", dados.deltaT],
+      ["Vento", dados.vento + (dados.direcaoVento ? " " + dados.direcaoVento : "")],
+      ["Rajadas", dados.rajada],
+      ["Chuva", dados.chuva],
+      ["Visibilidade", dados.visibilidade],
+      ["Atualizado", dados.atualizado]
+    ];
+
+    if (incluirAplicacao) {
+      linhas.push(
+        [],
+        ["RELATÓRIO DA APLICAÇÃO"],
+        ["Piloto", apl.piloto || "-"],
+        ["Modelo do Drone", apl.droneModelo || "-"],
+        ["Local da Pulverização", apl.localPulv || "-"],
+        ["Data/Hora da Aplicação", apl.dataHoraAplicacao || "-"],
+        ["Cultura", apl.cultura || "-"],
+        ["Quantidade de Água (L/ha)", apl.quantidadeAgua || "-"],
+        ["Área Pulverizada (ha)", apl.areaPulverizada || "-"],
+        ["Faixa (m)", apl.faixa || "-"],
+        ["Velocidade (m/s)", apl.velocidade || "-"],
+        ["Altura (m)", apl.altura || "-"],
+        ["Vazão (L/ha)", apl.vazao || "-"],
+        ["Observações", apl.observacoes || "-"]
+      );
+
+      apl.products.forEach((p, index) => {
+        linhas.push(
+          [],
+          [`Produto ${index + 1}`],
+          ["Tipo de Aplicação", p.tipoAplicacao || "-"],
+          ["Produto", p.produto || "-"],
+          ["Dosagem do Produto (mL/ha ou L/ha)", p.dosagemProduto || "-"],
+          ["Adjuvante", p.adjuvante || "-"],
+          ["Dosagem do Adjuvante (mL/ha ou L/ha)", p.dosagemAdjuvante || "-"]
+        );
+      });
+    }
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(linhas);
+
+    ws["!cols"] = [{ wch: 28 }, { wch: 40 }];
+    ws["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+      { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
+    ];
+    if (incluirAplicacao) {
+      const idxTituloApl = linhas.findIndex(r => r[0] === "RELATÓRIO DA APLICAÇÃO");
+      if (idxTituloApl >= 0) ws["!merges"].push({ s: { r: idxTituloApl, c: 0 }, e: { r: idxTituloApl, c: 1 } });
+      apl.products.forEach((_, index) => {
+        const idxProduto = linhas.findIndex(r => r[0] === `Produto ${index + 1}`);
+        if (idxProduto >= 0) ws["!merges"].push({ s: { r: idxProduto, c: 0 }, e: { r: idxProduto, c: 1 } });
+      });
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, "Dados");
+    XLSX.writeFile(wb, `Relatorio_Bom_para_Voar_${new Date().toISOString().slice(0,10)}.xlsx`);
+  }
+
+  document.getElementById('downloadReport').addEventListener('click', () => {
+    const dados = coletarDadosAtuaisDoGrid();
+    if (!dados) {
+      mostrarStatus("Nenhum dado disponível para exportar", "error");
+      return;
+    }
+    gerarRelatorioExcelDeDadosAtuais(dados);
+    mostrarStatus("Relatório gerado com sucesso!", "success");
+  });
+
+  document.getElementById('downloadReportBottom').addEventListener('click', () => {
+    const dados = coletarDadosAtuaisDoGrid();
+    if (!dados) {
+      mostrarStatus("Nenhum dado disponível para exportar", "error");
+      return;
+    }
+    gerarRelatorioExcelDeDadosAtuais(dados);
+    mostrarStatus("Relatório gerado com sucesso!", "success");
+  });
 </script>
 </html>
+
+
+
+            
+            
+ 
+    
+                      
