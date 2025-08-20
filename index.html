@@ -265,23 +265,24 @@
       </button>
     </div>
   </div>
-  
- <!-- Script do Vercel Analytics -->
-  <script defer src="https://va.vercel.app/script.js" data-site-id="prj_SkeShTMB77FJI0Be3LjaK9zij71n"></script>
-</body>
-</html>
-<script>
-  const grid = document.getElementById("grid");
-  const forecastGrid = document.getElementById("forecastGrid");
-  const statusBox = document.getElementById("status");
-  const cityInput = document.getElementById("cityInput");
-  const citySuggestions = document.getElementById("citySuggestions");
-  const locationButton = document.getElementById("locationButton");
-  const themeToggle = document.getElementById("themeToggle");
-  const themeIcon = document.getElementById("themeIcon");
-  const productsContainer = document.getElementById("productsContainer");
-  const addProductButton = document.getElementById("addProduct");
 
+  <!-- Biblioteca SheetJS para download do Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- Script do Vercel Analytics -->
+  <script defer src="https://va.vercel.app/script.js" data-site-id="prj_SkeShTMB77FJI0Be3LjaK9zij71n"></script>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const forecastGrid = document.getElementById("forecastGrid");
+    const statusBox = document.getElementById("status");
+    const cityInput = document.getElementById("cityInput");
+    const citySuggestions = document.getElementById("citySuggestions");
+    const locationButton = document.getElementById("locationButton");
+    const themeToggle = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    const productsContainer = document.getElementById("productsContainer");
+    const addProductButton = document.getElementById("addProduct");
     const QTD_PREVISOES = 5;
 
     // LISTAS
