@@ -1223,6 +1223,26 @@
       gerarRelatorioExcelDeDadosAtuais(dados);
       mostrarStatus("Relatório gerado com sucesso!", "success");
     });
+    
   </script>
+  import { Analytics } from '@vercel/analytics/next';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="pt-BR">
+      <head>
+        <title>Bom para Voar - Drone Pulverização</title>
+      </head>
+      <body>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  );
+}
 </body>
 </html>
