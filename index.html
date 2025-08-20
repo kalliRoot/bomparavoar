@@ -105,6 +105,21 @@
     .remove-product:hover {
       color: #dc2626;
     }
+    .visitor-count {
+      background-color: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 12px;
+      font-size: 14px;
+    }
+    .dark-mode .visitor-count {
+      background-color: #1e3a8a;
+      border-color: #3b82f6;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
@@ -112,6 +127,10 @@
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Bom para Voar - Drone Pulverização</h1>
       <div class="flex items-center">
+        <div id="visitorCount" class="visitor-count hidden">
+          <i class="fas fa-users"></i>
+          <span id="visitorNumber">0</span> visitantes
+        </div>
         <button 
           id="themeToggle" 
           class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -280,6 +299,8 @@
   const themeIcon = document.getElementById("themeIcon");
   const productsContainer = document.getElementById("productsContainer");
   const addProductButton = document.getElementById("addProduct");
+  const visitorCountElement = document.getElementById("visitorCount");
+  const visitorNumberElement = document.getElementById("visitorNumber");
 
   const QTD_PREVISOES = 5;
 
@@ -341,6 +362,31 @@
     "Condicionador de calda", "Silicone", "Surfactante não iônico", 
     "Surfactante catiônico", "Emulsionante", "Dispersante", "Antiespumante"
   ];
+
+  // Inicializar contador de visitantes
+  function inicializarContadorVisitantes() {
+    try {
+      // Verificar se o script do Vercel Analytics foi carregado
+      if (typeof window.va !== 'undefined') {
+        // Simular contador de visitantes (em produção, você usaria a API do Vercel)
+        let visitCount = localStorage.getItem('visitCount') || 0;
+        visitCount = parseInt(visitCount) + 1;
+        localStorage.setItem('visitCount', visitCount);
+        
+        // Atualizar a interface
+        visitorNumberElement.textContent = visitCount;
+        visitorCountElement.classList.remove('hidden');
+        
+        console.log('Contador de visitantes inicializado:', visitCount);
+      } else {
+        console.warn('Script do Vercel Analytics não carregado');
+        // Tentar novamente após um tempo
+        setTimeout(inicializarContadorVisitantes, 1000);
+      }
+    } catch (error) {
+      console.error('Erro ao inicializar contador de visitantes:', error);
+    }
+  }
 
   // HELPERS DE FORM
   function popularSelect(id, opcoes, classe = '') {
@@ -423,6 +469,9 @@
     popularSelect(1, [], 'produto');
     popularSelect(1, ADJUVANTES, 'adjuvante');
     addProductButton.addEventListener("click", addProduct);
+    
+    // Inicializar contador de visitantes
+    inicializarContadorVisitantes();
   });
 
   function coletarDadosAplicacao() {
@@ -1166,22 +1215,24 @@ function coletarDadosAtuaisDoGrid() {
       }
 
       const apl = coletarDadosAplicacao();
-      const erros = validarAplicacao(apl);
-      if (erros.length > 0) {
-        mostrarStatus(`Erro: ${erros.join("; ")}`, "error");
-        return;
+      const incluirAplicacao = temAplicacaoPreenchida(apl);
+      
+      // Se a aplicação não estiver preenchida, apenas validar os dados meteorológicos
+      if (incluirAplicacao) {
+        const erros = validarAplicacao(apl);
+        if (erros.length > 0) {
+          mostrarStatus(`Erro: ${erros.join("; ")}`, "error");
+          return;
+        }
       }
 
-      const incluirAplicacao = temAplicacaoPreenchida(apl);
-      const previsoes = coletarDadosPrevisaoDoGrid();
-
-      // Planilha de Dados Atuais
-      const linhasAtuais = [
-        ["Relatório Bom para Voar - Informações Meteorológicas"],
+      // Criar uma única planilha com todos os dados
+      const linhas = [
+        ["Relatório Bom para Voar"],
         ["Gerado em:", new Date().toLocaleString()],
         ["Localização:", dados.localizacao],
         [],
-        ["DADOS ATUAIS"],
+        ["DADOS METEOROLÓGICOS ATUAIS"],
         ["Condição", dados.condicao],
         ["Temperatura", dados.temp],
         ["Umidade", dados.umidade],
@@ -1192,36 +1243,13 @@ function coletarDadosAtuaisDoGrid() {
         ["Chuva", dados.chuva],
         ["Visibilidade", dados.visibilidade],
         ["Índice KP", dados.kpIndex],
-        ["Atualizado", dados.atualizado]
+        ["Atualizado", dados.atualizado],
+        []
       ];
 
-      const wb = XLSX.utils.book_new();
-      const wsAtuais = XLSX.utils.aoa_to_sheet(linhasAtuais);
-      wsAtuais["!cols"] = [{ wch: 28 }, { wch: 40 }];
-      wsAtuais["!merges"] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
-        { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
-      ];
-      XLSX.utils.book_append_sheet(wb, wsAtuais, "Dados Atuais");
-
-      // Planilha de Previsões
-      if (previsoes.length > 0) {
-        const linhasPrevisoes = [
-          ["PREVISÕES"],
-          ["Hora", "Temperatura", "Vento", "Chuva"]
-        ];
-        previsoes.forEach(p => {
-          linhasPrevisoes.push([p.hora, p.temp, p.vento, p.chuva]);
-        });
-        const wsPrevisoes = XLSX.utils.aoa_to_sheet(linhasPrevisoes);
-        wsPrevisoes["!cols"] = [{ wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
-        wsPrevisoes["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-        XLSX.utils.book_append_sheet(wb, wsPrevisoes, "Previsões");
-      }
-
-      // Planilha de Aplicação
+      // Adicionar dados de aplicação se preenchidos
       if (incluirAplicacao) {
-        const linhasAplicacao = [
+        linhas.push(
           ["RELATÓRIO DA APLICAÇÃO"],
           ["Piloto", apl.piloto || "-"],
           ["Modelo do Drone", apl.droneModelo || "-"],
@@ -1236,10 +1264,10 @@ function coletarDadosAtuaisDoGrid() {
           ["Vazão (L/ha)", apl.vazao || "-"],
           ["Observações", apl.observacoes || "-"],
           []
-        ];
+        );
 
         apl.products.forEach((p, index) => {
-          linhasAplicacao.push(
+          linhas.push(
             [`Produto ${index + 1}`],
             ["Tipo de Aplicação", p.tipoAplicacao || "-"],
             ["Produto", p.produto || "-"],
@@ -1249,18 +1277,36 @@ function coletarDadosAtuaisDoGrid() {
             []
           );
         });
-
-        const wsAplicacao = XLSX.utils.aoa_to_sheet(linhasAplicacao);
-        wsAplicacao["!cols"] = [{ wch: 28 }, { wch: 40 }];
-        wsAplicacao["!merges"] = [
-          { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }
-        ];
-        apl.products.forEach((_, index) => {
-          const idxProduto = linhasAplicacao.findIndex(r => r[0] === `Produto ${index + 1}`);
-          if (idxProduto >= 0) wsAplicacao["!merges"].push({ s: { r: idxProduto, c: 0 }, e: { r: idxProduto, c: 1 } });
-        });
-        XLSX.utils.book_append_sheet(wb, wsAplicacao, "Aplicação");
       }
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(linhas);
+      ws["!cols"] = [{ wch: 28 }, { wch: 40 }];
+      
+      // Adicionar merges para os títulos
+      const merges = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } },
+        { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } }
+      ];
+      
+      // Adicionar merge para o título da aplicação se existir
+      if (incluirAplicacao) {
+        const aplicacaoIndex = linhas.findIndex(row => row[0] === "RELATÓRIO DA APLICAÇÃO");
+        if (aplicacaoIndex >= 0) {
+          merges.push({ s: { r: aplicacaoIndex, c: 0 }, e: { r: aplicacaoIndex, c: 1 } });
+        }
+        
+        // Adicionar merges para os produtos
+        apl.products.forEach((_, index) => {
+          const produtoIndex = linhas.findIndex(row => row[0] === `Produto ${index + 1}`);
+          if (produtoIndex >= 0) {
+            merges.push({ s: { r: produtoIndex, c: 0 }, e: { r: produtoIndex, c: 1 } });
+          }
+        });
+      }
+      
+      ws["!merges"] = merges;
+      XLSX.utils.book_append_sheet(wb, ws, "Relatório Bom para Voar");
 
       XLSX.writeFile(wb, `Relatorio_Bom_para_Voar_${new Date().toISOString().slice(0,10)}.xlsx`);
       mostrarStatus("Relatório gerado com sucesso!", "success");
@@ -1275,12 +1321,12 @@ function coletarDadosAtuaisDoGrid() {
       let csvContent = "data:text/csv;charset=utf-8,";
 
       // Dados Atuais
-      const linhasAtuais = [
-        ["Relatório Bom para Voar - Informações Meteorológicas"],
+      const linhas = [
+        ["Relatório Bom para Voar"],
         ["Gerado em:", new Date().toLocaleString()],
         ["Localização:", dados.localizacao],
         [],
-        ["DADOS ATUAIS"],
+        ["DADOS METEOROLÓGICOS ATUAIS"],
         ["Condição", dados.condicao],
         ["Temperatura", dados.temp],
         ["Umidade", dados.umidade],
@@ -1291,29 +1337,16 @@ function coletarDadosAtuaisDoGrid() {
         ["Chuva", dados.chuva],
         ["Visibilidade", dados.visibilidade],
         ["Índice KP", dados.kpIndex],
-        ["Atualizado", dados.atualizado]
+        ["Atualizado", dados.atualizado],
+        []
       ];
-      csvContent += linhasAtuais.map(row => row.join(",")).join("\n") + "\n\n";
-
-      // Previsões
-      const previsoes = coletarDadosPrevisaoDoGrid();
-      if (previsoes.length > 0) {
-        csvContent += "PREVISÕES\n";
-        const linhasPrevisoes = [
-          ["Hora", "Temperatura", "Vento", "Chuva"]
-        ];
-        previsoes.forEach(p => {
-          linhasPrevisoes.push([p.hora, p.temp, p.vento, p.chuva]);
-        });
-        csvContent += linhasPrevisoes.map(row => row.join(",")).join("\n") + "\n\n";
-      }
 
       // Aplicação
       const apl = coletarDadosAplicacao();
       const incluirAplicacao = temAplicacaoPreenchida(apl);
       if (incluirAplicacao) {
-        csvContent += "RELATÓRIO DA APLICAÇÃO\n";
-        const linhasAplicacao = [
+        linhas.push(
+          ["RELATÓRIO DA APLICAÇÃO"],
           ["Piloto", apl.piloto || "-"],
           ["Modelo do Drone", apl.droneModelo || "-"],
           ["Local da Pulverização", apl.localPulv || "-"],
@@ -1327,10 +1360,10 @@ function coletarDadosAtuaisDoGrid() {
           ["Vazão (L/ha)", apl.vazao || "-"],
           ["Observações", apl.observacoes || "-"],
           []
-        ];
+        );
 
         apl.products.forEach((p, index) => {
-          linhasAplicacao.push(
+          linhas.push(
             [`Produto ${index + 1}`],
             ["Tipo de Aplicação", p.tipoAplicacao || "-"],
             ["Produto", p.produto || "-"],
@@ -1340,9 +1373,9 @@ function coletarDadosAtuaisDoGrid() {
             []
           );
         });
-
-        csvContent += linhasAplicacao.map(row => row.join(",")).join("\n");
       }
+
+      csvContent += linhas.map(row => row.join(",")).join("\n");
 
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -1376,4 +1409,4 @@ function coletarDadosAtuaisDoGrid() {
     gerarRelatorioExcelDeDadosAtuais(dados);
   });
 </script>
-  
+</html>
